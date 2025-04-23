@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="10" xmlns:fx="http://javafx.com/fxml" fx:controller="com.freelancer.RegisterController">
+    <Label text="Register"/>
+    <TextField fx:id="nameField" promptText="Name"/>
+    <TextField fx:id="emailField" promptText="Email"/>
+    <PasswordField fx:id="passwordField" promptText="Password"/>
+    <ComboBox fx:id="roleBox" promptText="Select Role">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="client"/>
+                <String fx:value="freelancer"/>
+            </FXCollections>
+        </items>
+        <value>
+            <String fx:value="client"/> <!-- Default selection -->
+        </value>
+    </ComboBox>
+    <Button text="Register" onAction="#handleRegister"/>
+    <Hyperlink text="Back to Login" onAction="#goToLogin"/>
+</VBox>

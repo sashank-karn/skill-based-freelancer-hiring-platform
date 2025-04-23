@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.collections.*?>
+<?import java.lang.String?>
+<?import javafx.scene.image.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.freelancer.FreelancerDashboardController">
+    
+    <!-- Navigation Bar -->
+    <HBox styleClass="nav-bar" alignment="CENTER_LEFT" spacing="10">
+        <padding>
+            <Insets top="10" right="20" bottom="10" left="20"/>
+        </padding>
+        
+        <!-- Left side -->
+        <Label fx:id="welcomeLabel" styleClass="welcome-text"/>
+        
+        <Region HBox.hgrow="ALWAYS"/> <!-- Spacer -->
+        
+        <!-- Right side -->
+        <Button fx:id="profileButton" onAction="#openProfile" styleClass="nav-button" text="Profile"/>
+        <Button fx:id="logoutButton" onAction="#handleLogout" styleClass="nav-button" text="Logout"/>
+    </HBox>
+    
+    <!-- Main Content -->
+    <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS">
+        <!-- Home Tab -->
+        <Tab text="Home" closable="false">
+            <VBox spacing="10" styleClass="content-box">
+                <Label text="Total Projects: " fx:id="totalProjectsLabel"/>
+                <Label text="Active Projects: " fx:id="activeProjectsLabel"/>
+                <Label text="Total Earnings: " fx:id="totalEarningsLabel"/>
+            </VBox>
+        </Tab>
+
+        <!-- Browse Projects Tab -->
+        <Tab text="Browse Projects" closable="false">
+            <VBox spacing="10" styleClass="content-box">
+                <TableView fx:id="browseProjectsTable">
+                    <columns>
+                        <TableColumn text="Project Title" fx:id="projectTitleColumn"/>
+                        <TableColumn text="Description" fx:id="projectDescriptionColumn"/>
+                        <TableColumn text="Budget" fx:id="budgetColumn"/>
+                        <TableColumn text="Deadline" fx:id="deadlineColumn"/>
+                        <TableColumn text="Status" fx:id="statusColumn"/>
+                    </columns>
+                </TableView>
+                <Label fx:id="browseProjectsErrorLabel" textFill="red" visible="false"/>
+                <HBox spacing="10">
+                    <TextField fx:id="bidAmountField" promptText="Enter Bid Amount"/>
+                    <TextField fx:id="timelineField" promptText="Enter Timeline"/>
+                    <Button text="Apply" onAction="#handleApplyToProject"/>
+                </HBox>
+            </VBox>
+        </Tab>
+
+        <!-- My Proposals Tab -->
+        <Tab text="My Proposals" closable="false">
+            <VBox spacing="10" styleClass="content-box">
+                <TableView fx:id="proposalsTable">
+                    <columns>
+                        <TableColumn text="Project Title" fx:id="proposalProjectTitleColumn"/>
+                        <TableColumn text="Bid Amount" fx:id="proposalBidAmountColumn"/>
+                        <TableColumn text="Timeline" fx:id="proposalTimelineColumn"/>
+                        <TableColumn text="Status" fx:id="proposalStatusColumn"/>
+                    </columns>
+                </TableView>
+                <Label fx:id="proposalsErrorLabel" textFill="red" visible="false"/>
+                <HBox spacing="10">
+                    <Button text="Update" onAction="#handleUpdateProposal"/>
+                    <Button text="Delete" onAction="#handleDeleteProposal"/>
+                </HBox>
+            </VBox>
+        </Tab>
+
+        <!-- My Projects Tab -->
+        <Tab text="My Projects" closable="false">
+            <VBox spacing="10" styleClass="content-box">
+                <TableView fx:id="myProjectsTable">
+                    <columns>
+                        <TableColumn text="Project Title" fx:id="myProjectTitleColumn"/>
+                        <TableColumn text="Paid Amount" fx:id="paidAmountColumn"/>
+                    </columns>
+                </TableView>
+                <Label fx:id="myProjectsErrorLabel" textFill="red" visible="false"/>
+                <Button text="Upload File" onAction="#handleUploadFile"/>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

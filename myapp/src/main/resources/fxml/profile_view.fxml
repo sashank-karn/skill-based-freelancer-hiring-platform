@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.freelancer.ProfileViewController" styleClass="profile-container">
+    
+    <!-- Navigation Bar -->
+    <HBox styleClass="nav-bar" alignment="CENTER_LEFT" spacing="10">
+        <padding>
+            <Insets top="10" right="20" bottom="10" left="20"/>
+        </padding>
+        
+        <!-- Left side -->
+        <Label text="Profile" styleClass="nav-title"/>
+        
+        <Region HBox.hgrow="ALWAYS"/> <!-- Spacer -->
+        
+        <!-- Right side -->
+        <FontIcon fx:id="homeIcon" iconLiteral="fas-home" iconSize="20" 
+                 onMouseClicked="#handleHomeClick" styleClass="nav-icon"/>
+        <FontIcon fx:id="logoutIcon" iconLiteral="fas-sign-out-alt" iconSize="20" 
+                 onMouseClicked="#handleLogout" styleClass="nav-icon"/>
+    </HBox>
+
+    <!-- Profile Content -->
+    <VBox spacing="20" styleClass="profile-content">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <!-- User Info Section -->
+        <GridPane vgap="15" hgap="10" styleClass="user-info-section">
+            <Label text="First Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <Label fx:id="nameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            
+            <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Label fx:id="emailLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            
+            <Label text="Role:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <Label fx:id="roleLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            
+            <Label text="Password:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <HBox alignment="CENTER_LEFT" spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                <PasswordField fx:id="passwordField" editable="false"/>
+                <FontIcon fx:id="togglePasswordIcon" iconLiteral="mdi2-eye"/>
+                <Button text="Change Password" onAction="#showChangePasswordDialog"/>
+            </HBox>
+
+            <Label text="Verification Status:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <HBox fx:id="verificationBox" spacing="5" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                <FontIcon fx:id="verificationIcon" iconLiteral="mdi2-account"/>
+                <Label fx:id="verificationLabel"/>
+            </HBox>
+        </GridPane>
+
+        <!-- Skills and Files Tabs -->
+        <TabPane>
+            <Tab text="Skills" closable="false">
+                <TableView fx:id="skillsTable">
+                    <columns>
+                        <TableColumn fx:id="skillNameColumn" text="Skill"/>
+                        <TableColumn fx:id="skillStatusColumn" text="Status"/>
+                        <TableColumn fx:id="skillActionColumn" text="Action"/>
+                    </columns>
+                </TableView>
+            </Tab>
+            
+            <Tab text="Shared Files" closable="false">
+                <VBox spacing="10">
+                    <Button text="Share New File" onAction="#showFileShareDialog"/>
+                    <TableView fx:id="filesTable">
+                        <columns>
+                            <TableColumn fx:id="fileNameColumn" text="File Name"/>
+                            <TableColumn fx:id="fileSkillColumn" text="Associated Skill"/>
+                            <TableColumn fx:id="fileDateColumn" text="Upload Date"/>
+                            <TableColumn fx:id="fileActionColumn" text="Actions"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </VBox>
+</VBox>

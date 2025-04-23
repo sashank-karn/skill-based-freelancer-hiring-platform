@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.freelancer.ClientDashboardController" 
+            styleClass="dashboard-root">
+    <!-- Top Navigation -->
+    <top>
+        <HBox spacing="10" style="-fx-background-color: #3f51b5; -fx-padding: 10;">
+            <Label text="Client Dashboard" style="-fx-font-size: 18px; -fx-text-fill: white; -fx-font-weight: bold;" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="🔔 Notifications" style="-fx-background-color: transparent; -fx-text-fill: white;" />
+            <Button text="🌙 Dark Mode" onAction="#toggleDarkMode" style="-fx-background-color: transparent; -fx-text-fill: white;" />
+            <MenuButton text="👤 Profile" styleClass="menu-button">
+                <items>
+                    <MenuItem text="Settings" styleClass="menu-item" />
+                    <MenuItem text="Help" styleClass="menu-item" />
+                    <MenuItem text="Logout" onAction="#handleLogout" styleClass="menu-item" />
+                </items>
+            </MenuButton>
+        </HBox>
+    </top>
+
+    <!-- Main Content -->
+    <center>
+        <VBox spacing="20" alignment="CENTER" style="-fx-padding: 20;">
+            <!-- Welcome Message -->
+            <Label fx:id="welcomeLabel" text="Welcome to Client Dashboard" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            
+            <!-- Buttons for Features -->
+            <Button text="Post Project" onAction="#handlePostProject" />
+            <Button text="Manage Proposals" onAction="#handleManageProposals" />
+            <Button text="Make Payment" onAction="#handleMakePayment" />
+        </VBox>
+    </center>
+</BorderPane>

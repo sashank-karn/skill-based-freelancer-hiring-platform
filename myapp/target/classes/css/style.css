@@ -1,0 +1,209 @@
+.root {
+    -fx-background-color: linear-gradient(to bottom, #e3eafc, #ffffff 80%);
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-padding: 50; /* Increased padding to better utilize the larger window */
+}
+
+.label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #222e50;
+    -fx-font-weight: bold;
+}
+
+.text-field, .password-field, .combo-box {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #b6c9f0;
+    -fx-border-width: 1;
+    -fx-padding: 10 14 10 14; /* Slightly increased padding for better spacing */
+    -fx-font-size: 14px;
+    -fx-background-color: #f7faff;
+    -fx-pref-width: 300px; /* Set a consistent width for all input fields */
+}
+
+/* Style for the dropdown menu options */
+.combo-box-popup .list-cell {
+    -fx-background-color: #f7faff;
+    -fx-text-fill: #222e50;
+    -fx-font-size: 14px;
+    -fx-padding: 8 12 8 12;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #e3eafc;
+    -fx-text-fill: #3f51b5;
+}
+
+.button {
+    -fx-background-color: linear-gradient(to right, #5a8dee, #3f51b5);
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-background-radius: 8;
+    -fx-padding: 10 28 10 28; /* Increased padding for larger buttons */
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, #b6c9f0, 5, 0, 0, 2);
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to right, #3f51b5, #5a8dee);
+}
+
+.hyperlink {
+    -fx-text-fill: #5a8dee;
+    -fx-underline: true;
+    -fx-font-size: 14px; /* Slightly increased font size */
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #3f51b5;
+}
+
+.vbox {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 40 40 40 40; /* Increased padding for better spacing */
+    -fx-spacing: 20; /* Increased spacing between elements */
+    -fx-effect: dropshadow(gaussian, #b6c9f0, 20, 0.2, 0, 4);
+}
+
+.menu-button {
+    -fx-background-color: #3f51b5;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 5 16;
+    -fx-background-radius: 5;
+    -fx-border-color: white;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+.menu-button:hover {
+    -fx-background-color: #5c6bc0;
+}
+
+
+/* Style for all dashboard root layouts */
+.dashboard-root {
+    -fx-pref-width: 850px;
+    -fx-pref-height: 600px;
+    -fx-alignment: center;
+    -fx-padding: 20;
+    -fx-background-color: #f4f4f4; /* Optional: Set a background color */
+}
+
+/* General styles for Help Center and Account Settings */
+.help-center-root, .account-settings-root {
+    -fx-padding: 20;
+    -fx-background-color: #f4f4f4;
+}
+
+.help-center-root Label, .account-settings-root Label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.help-center-root Button, .account-settings-root Button {
+    -fx-background-color: #3f51b5;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10 20;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.help-center-root Button:hover, .account-settings-root Button:hover {
+    -fx-background-color: #303f9f;
+}
+
+/* --- MenuButton Dropdown (ContextMenu) Styling --- */
+.context-menu {
+    -fx-background-color: #3f51b5; /* Same as your top bar */
+    -fx-background-radius: 0 0 8 8;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(three-pass-box, rgba(50,50,50,0.15), 8, 0, 0, 2);
+    -fx-padding: 0;
+}
+
+/* MenuItems inside MenuButton dropdown */
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 10 24;
+}
+
+.menu-item .label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+}
+
+.menu-item:focused, .menu-item:hovered {
+    -fx-background-color: #5a8dee;
+}
+
+.menu-item:focused .label, .menu-item:hovered .label {
+    -fx-text-fill: #fff;
+}
+
+/* Remove the following if present, as it causes inheritance issues */
+.menu-button, .menu-item {
+    /* REMOVE or COMMENT OUT these lines! */
+    /* -fx-background-color: inherit;
+    -fx-text-fill: inherit; */
+}
+
+/* Style for buttons in the projects and proposals tabs */
+.tab-content .button {
+    -fx-background-color: linear-gradient(to right, #4caf50, #81c784);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+}
+
+.tab-content .button:hover {
+    -fx-background-color: linear-gradient(to right, #388e3c, #66bb6a);
+}
+
+/* Style for error labels */
+.error-label {
+    -fx-text-fill: red;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.nav-icon {
+    -fx-icon-size: 20;
+    -fx-icon-color: #3f51b5;
+}
+
+.nav-icon:hover {
+    -fx-icon-color: #5a8dee;
+}
+
+.welcome-text {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.verified {
+    -fx-text-fill: #4caf50;
+}
+
+.not-verified {
+    -fx-text-fill: #f44336;
+}
