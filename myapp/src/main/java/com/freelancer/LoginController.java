@@ -26,91 +26,90 @@ public class LoginController {
 
     @FXML
     private void handleLogin(ActionEvent event) {
-        String email = emailField.getText();
-        String password = passwordField.getText();
-        String selectedRole = roleBox.getValue();
-
-        // Clear the error label before validation
-        errorLabel.setVisible(false);
-        errorLabel.setText("");
-
-        // Validate email and password fields
-        if (email.isEmpty() || password.isEmpty()) {
-            errorLabel.setText("Please fill all fields.");
-            errorLabel.setVisible(true);
-            return;
-        }
-
-        // Validate role selection
-        if (selectedRole == null || selectedRole.isEmpty()) {
-            errorLabel.setText("Please select a role.");
-            errorLabel.setVisible(true);
-            return;
-        }
-
+        String email = emailField.getText().trim();
+        String password = passwordField.getText().trim();
+        
         try (Connection conn = DBUtil.getConnection()) {
-            String sql = "SELECT * FROM users WHERE email=? AND password=? AND role=?";
+            String sql = "SELECT * FROM Users WHERE email = ? AND password = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, email);
-            ps.setString(2, password); // In production, use hashed passwords!
-            ps.setString(3, selectedRole);
+            ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
+            
             if (rs.next()) {
-                int userId = rs.getInt("user_id"); // Retrieve userId
-                String userName = rs.getString("name");
-                loadDashboard(selectedRole, userName, userId); // Pass userId
+                int userId = rs.getInt("user_id");
+                String role = rs.getString("role");
+                String userName = rs.getString("name"); // Assuming there's a name column
+                
+                // Debug output
+                System.out.println("Login successful! User ID: " + userId + ", Role: " + role);
+                
+                // Create a session for the user
+                UserSession session = UserSession.getInstance();
+                session.setUser(userId, userName, role);
+                
+                if (role.equalsIgnoreCase("client")) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/client_dashboard.fxml"));
+                    Parent root = loader.load();
+                    
+                    ClientDashboardController controller = loader.getController();
+                    controller.setUserId(userId);
+                    
+                    Scene scene = new Scene(root);
+                    StyleManager.applyStylesheets(scene);
+                    
+                    Stage stage = (Stage) emailField.getScene().getWindow();
+                    stage.setScene(scene);
+                    stage.setTitle("Client Dashboard");
+                    stage.show();
+                } 
+                else if (role.equalsIgnoreCase("freelancer")) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/freelancer_dashboard.fxml"));
+                    Parent root = loader.load();
+                    
+                    FreelancerDashboardController controller = loader.getController();
+                    controller.setUserId(userId);
+                    
+                    Scene scene = new Scene(root);
+                    StyleManager.applyStylesheets(scene);
+                    
+                    Stage stage = (Stage) emailField.getScene().getWindow();
+                    stage.setScene(scene);
+                    stage.setTitle("Freelancer Dashboard");
+                    stage.show();
+                }
+                else if (role.equalsIgnoreCase("admin")) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin_dashboard.fxml"));
+                    Parent root = loader.load();
+                    
+                    AdminDashboardController controller = loader.getController();
+                    controller.setUserId(userId);  // This will now work with our new method
+                    
+                    Scene scene = new Scene(root);
+                    StyleManager.applyStylesheets(scene);
+                    
+                    Stage stage = (Stage) emailField.getScene().getWindow();
+                    stage.setScene(scene);
+                    stage.setTitle("Admin Dashboard");
+                    stage.show();
+                }
+                else {
+                    // Unknown role
+                    showAlert(Alert.AlertType.ERROR, "Login Error", 
+                        "Unknown user role: " + role);
+                }
             } else {
-                errorLabel.setText("Invalid credentials or role mismatch.");
-                errorLabel.setVisible(true);
+                showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid email or password.");
             }
         } catch (Exception e) {
-            errorLabel.setText("Database error: " + e.getMessage());
-            errorLabel.setVisible(true);
-        }
-    }
-
-    private void loadDashboard(String role, String userName, int userId) {
-        String fxmlFile = "";
-
-        switch (role) {
-            case "Client":
-                fxmlFile = "/fxml/client_dashboard.fxml";
-                break;
-            case "Freelancer":
-                fxmlFile = "/fxml/freelancer_dashboard.fxml";
-                break;
-            case "Admin":
-                fxmlFile = "/fxml/admin_dashboard.fxml";
-                break;
-            default:
-                showAlert("Unknown role: " + role);
-                return;
-        }
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
-            Parent root = loader.load();
-
-            if (role.equals("Freelancer")) {
-                FreelancerDashboardController controller = loader.getController();
-                controller.setUserId(userId); // Pass userId to the controller
-                controller.setUserName(userName);
-            }
-
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) emailField.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(role + " Dashboard");
-            stage.show();
-        } catch (Exception e) {
-            showAlert("Could not load the dashboard: " + e.getMessage());
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not connect to database: " + e.getMessage());
         }
     }
 
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

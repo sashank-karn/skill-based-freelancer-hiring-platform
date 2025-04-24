@@ -1,83 +1,44 @@
 package com.freelancer;
 
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class AdminDashboardController {
-    @FXML private TableView<?> userTable;
-    @FXML private TableView<?> skillTable;
-    @FXML private TableView<?> verificationTable;
-    @FXML private Label welcomeLabel;
-    private boolean isDarkMode = false;
-    private String userName;
-
-    @FXML
-    public void initialize() {
-        welcomeLabel.setText("Welcome to Admin Dashboard");
+public class AdminDashboardController implements Initializable {
+    
+    private int userId;
+    
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        // Initialize components
     }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-        if (welcomeLabel != null) {
-            welcomeLabel.setText("Welcome, " + userName);
-        }
+    
+    /**
+     * Sets the user ID and loads admin data
+     * @param userId The ID of the admin user
+     */
+    public void setUserId(int userId) {
+        this.userId = userId;
+        System.out.println("AdminDashboardController: userId set to " + this.userId);
+        loadAdminData();
     }
-
-    @FXML
-    private void handleManageUsers(ActionEvent event) {
-        showAlert("Manage Users functionality is under development.");
-    }
-
-    @FXML
-    private void handleManageRoles(ActionEvent event) {
-        showAlert("Manage Roles functionality is under development.");
-    }
-
-    @FXML
-    private void handleSkillManagement(ActionEvent event) {
-        showAlert("Skill Management functionality is under development.");
-    }
-
-    @FXML
-    private void handleFreelancerVerification(ActionEvent event) {
-        showAlert("Freelancer Verification functionality is under development.");
-    }
-
-    @FXML
-    private void handleLogout(ActionEvent event) {
+    
+    /**
+     * Loads admin-specific data
+     */
+    private void loadAdminData() {
+        // Load admin data using userId
+        // For example: load users, projects, statistics, etc.
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Login");
-            stage.show();
+            // Your database loading logic here
+            System.out.println("Loading admin data for user ID: " + userId);
         } catch (Exception e) {
-            showAlert("Could not log out: " + e.getMessage());
+            System.err.println("Error loading admin data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-
-    @FXML
-    private void toggleDarkMode() {
-        isDarkMode = !isDarkMode;
-        Scene scene = welcomeLabel.getScene();
-        if (isDarkMode) {
-            scene.getStylesheets().add(getClass().getResource("/css/dark-mode.css").toExternalForm());
-        } else {
-            scene.getStylesheets().remove(getClass().getResource("/css/dark-mode.css").toExternalForm());
-        }
-    }
-
-    private void showAlert(String msg) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setContentText(msg);
-        alert.showAndWait();
-    }
+    
+    // Rest of your controller code
 }

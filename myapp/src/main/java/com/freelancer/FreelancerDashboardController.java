@@ -18,8 +18,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
 
-import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class FreelancerDashboardController {
     @FXML private Label welcomeLabel;
@@ -69,6 +69,10 @@ public class FreelancerDashboardController {
 
     @FXML private Label browseProjectsErrorLabel;
     @FXML private Label myProjectsErrorLabel;
+
+    @FXML private FontIcon profileIcon;
+    @FXML private FontIcon logoutIcon;
+    @FXML private FontIcon settingsIcon;
 
     private String userName;
     private int userId;
@@ -469,40 +473,6 @@ public class FreelancerDashboardController {
         alert.showAndWait();
     }
 
-    @FXML
-    private void goBack() {
-        if (!pageHistory.isEmpty()) {
-            try {
-                String previousPage = pageHistory.pop();
-
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(previousPage));
-                Parent root = loader.load();
-
-                if (previousPage.equals("/fxml/freelancer_dashboard.fxml")) {
-                    FreelancerDashboardController controller = loader.getController();
-                    controller.setUserName(userName);
-                    controller.setUserId(userId);
-                    if (backButton != null) {
-                        backButton.setVisible(false); // Hide the back button on the dashboard
-                    }
-                }
-
-                if (backButton != null) {
-                    Stage stage = (Stage) backButton.getScene().getWindow();
-                    Scene scene = new Scene(root, 800, 600);
-                    scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-                    stage.setScene(scene);
-                    stage.setTitle(getPageTitle(previousPage));
-                    stage.show();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                showAlert("An error occurred while navigating back: " + e.getMessage());
-            }
-        } else {
-            showAlert("No previous page to navigate back to.");
-        }
-    }
 
     private String getPageTitle(String fxmlPath) {
         switch (fxmlPath) {
@@ -515,133 +485,10 @@ public class FreelancerDashboardController {
         }
     }
 
-    private void updateBackButtonState() {
-        if (backButton != null) {
-            backButton.setDisable(pageHistory.isEmpty());
-        }
-    }
+ 
 
     @FXML
-    private void openNotifications(MouseEvent event) {
-        if (notificationsButton == null) return;
-        
-        // Create a ContextMenu for notifications
-        ContextMenu notificationsMenu = new ContextMenu();
-
-        // Add sample notifications (replace with dynamic data if needed)
-        MenuItem notification1 = new MenuItem("New project invitation: Build a website");
-        MenuItem notification2 = new MenuItem("Proposal accepted: Mobile App Development");
-        MenuItem notification3 = new MenuItem("System update: Scheduled maintenance on April 30");
-
-        // Add notifications to the menu
-        notificationsMenu.getItems().addAll(notification1, notification2, notification3);
-
-        // Show the notifications menu at the mouse click location
-        notificationsMenu.show(notificationsButton, event.getScreenX(), event.getScreenY());
-    }
-
-    @FXML
-    private void openNotifications(ActionEvent event) {
-        // Use MouseEvent version with default location
-        if (notificationsButton != null) {
-            openNotifications(new MouseEvent(
-                MouseEvent.MOUSE_CLICKED, 0, 0, 0, 0, 
-                null, 0, false, false, false, false, 
-                false, false, false, false, false, false, null));
-        }
-    }
-
-    @FXML
-    private void toggleDarkMode() {
-        if (backButton == null) return;
-        
-        isDarkMode = !isDarkMode; // Toggle the dark mode state
-        Scene scene = backButton.getScene(); // Get the current scene
-
-        try {
-            String darkModeStylesheet = getClass().getResource("/css/dark_mode.css").toExternalForm();
-            String lightModeStylesheet = getClass().getResource("/css/style.css").toExternalForm();
-
-            if (isDarkMode) {
-                scene.getStylesheets().remove(lightModeStylesheet);
-                scene.getStylesheets().add(darkModeStylesheet);
-            } else {
-                scene.getStylesheets().remove(darkModeStylesheet);
-                scene.getStylesheets().add(lightModeStylesheet);
-            }
-        } catch (NullPointerException e) {
-            showAlert("Error: Stylesheet not found.");
-        }
-    }
-
-    @FXML
-    private void openAccountSettings() {
-        if (backButton == null) return;
-        
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/account_settings.fxml"));
-            Parent root = loader.load();
-
-            // Pass user data to the AccountSettingsController if needed
-            AccountSettingsController controller = loader.getController();
-            controller.setUserName(userName);
-
-            // Add the current page to the history stack
-            pageHistory.push(currentPage);
-            currentPage = "/fxml/account_settings.fxml";
-
-            // Set the scene to the Account Settings page
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            Scene scene = new Scene(root, 800, 600);
-            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-            stage.setScene(scene);
-            stage.setTitle("Account Settings");
-            stage.show();
-
-            // Show the back button
-            backButton.setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("An error occurred while opening Account Settings: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void openHelpCenter() {
-        if (backButton == null) return;
-        
-        try {
-            // Load the Help Center page
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/help_center.fxml"));
-            Parent root = loader.load();
-
-            // Add the current page to the history stack
-            pageHistory.push(currentPage);
-            currentPage = "/fxml/help_center.fxml";
-
-            // Set the scene to the Help Center page
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            Scene scene = new Scene(root, 800, 600);
-            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-            stage.setScene(scene);
-            stage.setTitle("Help Center");
-            stage.show();
-
-            // Update the back button state
-            updateBackButtonState();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("An error occurred while opening the Help Center: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void handleLogout(ActionEvent event) {
-        handleLogout();
-    }
-    
-    @FXML
-    private void handleLogout() {
+    private void handleLogout(MouseEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
             Parent root = loader.load();
@@ -661,6 +508,27 @@ public class FreelancerDashboardController {
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("An error occurred while logging out: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void openProfile(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profile_view.fxml"));
+            Parent root = loader.load();
+            
+            ProfileViewController controller = loader.getController();
+            controller.setUserId(userId); // Pass the user ID
+            
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            
+            Stage stage = (Stage) profileIcon.getScene().getWindow(); 
+            stage.setScene(scene);
+            stage.setTitle("Profile");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error loading profile page: " + e.getMessage());
         }
     }
 
@@ -708,34 +576,6 @@ public class FreelancerDashboardController {
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("An error occurred while switching to the Browse Projects tab: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void openProfile(ActionEvent event) {
-        openProfile();
-    }
-    
-    @FXML
-    private void openProfile() {
-        if (welcomeLabel == null) return;
-        
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profile_view.fxml"));
-            Parent root = loader.load();
-            
-            ProfileViewController controller = loader.getController();
-            controller.setUserId(userId); // Pass the user ID
-            
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-            
-            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Profile");
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error loading profile page: " + e.getMessage());
         }
     }
 

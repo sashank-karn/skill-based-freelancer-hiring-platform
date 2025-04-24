@@ -1,0 +1,67 @@
+/* Tab Pane */
+.tab-pane {
+    -fx-tab-min-height: 40px;
+    -fx-tab-max-height: 40px;
+}
+
+.tab-pane .tab-header-area {
+    -fx-padding: 5 0 0 0;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: transparent transparent #e0e0e0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Tabs */
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5 5 0 0;
+    -fx-border-color: transparent;
+    -fx-padding: 0 20px;
+    -fx-cursor: hand;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: white;
+    -fx-background-radius: 5 5 0 0;
+    -fx-border-width: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+/* Tab content */
+.tab-pane .tab-content-area {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);
+    -fx-background-radius: 0 5 5 5;
+    -fx-padding: 15;
+}
+
+/* Tab text */
+.tab .tab-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+    -fx-alignment: CENTER;
+    -fx-padding: 0 10;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #3f51b5;
+    -fx-font-weight: bold;
+}
+
+/* Tab close button */
+.tab .tab-close-button {
+    -fx-background-color: #999;
+    -fx-shape: "M 0,0 H1 L 4,3 7,0 H8 V1 L 5,4 8,7 V8 H7 L 4,5 1,8 H0 V7 L 3,4 0,1 Z";
+}
+
+.tab:selected .tab-close-button {
+    -fx-background-color: #3f51b5;
+}
+
+.tab .tab-close-button:hover {
+    -fx-background-color: #f44336;
+}

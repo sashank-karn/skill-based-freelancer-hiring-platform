@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.freelancer.CreateProjectController"
+            prefHeight="600.0" prefWidth="700.0"
+            stylesheets="/css/style.css">
+
+    <top>
+        <VBox styleClass="header-panel">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label text="Create New Project" styleClass="panel-title">
+                <font>
+                    <Font size="20" name="System Bold"/>
+                </font>
+            </Label>
+            <Label text="Fill in the details below to create your project" styleClass="panel-subtitle"/>
+        </VBox>
+    </top>
+    
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="form-container">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="20" right="30" bottom="20" left="30"/>
+                </padding>
+                
+                <VBox spacing="8">
+                    <Label text="Project Title *" styleClass="form-label"/>
+                    <TextField fx:id="titleField" promptText="Enter a clear, descriptive title for your project"/>
+                </VBox>
+                
+                <VBox spacing="8">
+                    <Label text="Project Category *" styleClass="form-label"/>
+                    <ComboBox fx:id="categoryComboBox" promptText="Select project category" maxWidth="Infinity"/>
+                </VBox>
+                
+                <VBox spacing="8">
+                    <Label text="Project Description *" styleClass="form-label"/>
+                    <TextArea fx:id="descriptionArea" promptText="Provide detailed information about your project requirements" 
+                              wrapText="true" prefRowCount="6"/>
+                </VBox>
+                
+                <VBox spacing="8">
+                    <Label text="Budget ($) *" styleClass="form-label"/>
+                    <TextField fx:id="budgetField" promptText="Enter budget amount" prefWidth="200"/>
+                </VBox>
+                
+                <VBox spacing="8">
+                    <Label text="Deadline *" styleClass="form-label"/>
+                    <DatePicker fx:id="deadlinePicker" promptText="Select deadline date" maxWidth="300"/>
+                </VBox>
+                
+                <Separator/>
+                
+                <Label text="* Required fields" styleClass="required-note"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <bottom>
+        <HBox styleClass="action-bar" alignment="CENTER_RIGHT" spacing="10">
+            <padding>
+                <Insets top="15" right="20" bottom="15" left="20"/>
+            </padding>
+            <Button text="Cancel" onAction="#handleCancel" styleClass="cancel-button"/>
+            <Button fx:id="createProjectButton" text="Create Project" onAction="#handleCreateProject" />
+        </HBox>
+    </bottom>
+    
+</BorderPane>

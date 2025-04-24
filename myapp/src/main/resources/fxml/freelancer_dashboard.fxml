@@ -17,13 +17,16 @@
         </padding>
         
         <!-- Left side -->
-        <Label fx:id="welcomeLabel" styleClass="welcome-text"/>
+         <Label text="Freelancer Platform - Freelancer Dashboard" styleClass="page-title"/>
         
         <Region HBox.hgrow="ALWAYS"/> <!-- Spacer -->
         
         <!-- Right side -->
-        <Button fx:id="profileButton" onAction="#openProfile" styleClass="nav-button" text="Profile"/>
-        <Button fx:id="logoutButton" onAction="#handleLogout" styleClass="nav-button" text="Logout"/>
+        <FontIcon fx:id="profileIcon" iconLiteral="fas-user-circle" iconSize="20" 
+         onMouseClicked="#openProfile" styleClass="nav-icon"/>
+         <FontIcon fx:id="logoutIcon" iconLiteral="fas-sign-out-alt" iconSize="20" 
+         onMouseClicked="#handleLogout" styleClass="nav-icon"/>
+       
     </HBox>
     
     <!-- Main Content -->

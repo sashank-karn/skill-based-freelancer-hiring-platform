@@ -207,3 +207,247 @@
 .not-verified {
     -fx-text-fill: #f44336;
 }
+
+/* Dashboard Container */
+.dashboard-container {
+    -fx-background-color: #f5f7fa;
+    -fx-font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+    -fx-background-color: linear-gradient(to right, #4776E6, #8E54E9);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
+}
+
+.welcome-intro {
+    -fx-text-fill: rgba(255,255,255,0.8);
+    -fx-font-size: 14px;
+    -fx-padding: 0;
+}
+
+.welcome-name {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+}
+
+/* Navigation Icons */
+.nav-icon {
+    -fx-fill: white;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0, 0, 1);
+    -fx-padding: 5px;
+}
+
+.nav-icon:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.8), 5, 0, 0, 0);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.nav-divider {
+    -fx-fill: rgba(255,255,255,0.5);
+    -fx-font-size: 16px;
+    -fx-padding: 0 5 0 5;
+}
+
+/* Main Content Area */
+.main-content {
+    -fx-spacing: 20;
+}
+
+/* Stats Cards */
+.stats-container {
+    -fx-padding: 0 0 20 0;
+}
+
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-min-width: 300;
+    -fx-pref-height: 120;
+    -fx-max-height: 120;
+    -fx-min-height: 120;
+}
+
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #555;
+    -fx-padding: 0 0 10 0;
+}
+
+.card-icon {
+    -fx-fill: #8E54E9;
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #777;
+}
+
+.stat-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.progress-bar {
+    -fx-pref-width: 200;
+    -fx-pref-height: 6;
+    -fx-background-radius: 3;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: linear-gradient(to right, #4776E6, #8E54E9);
+    -fx-background-radius: 3;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #eee;
+    -fx-background-radius: 3;
+}
+
+/* Tab Pane Styling */
+.dashboard-tabs {
+    -fx-tab-min-width: 120px;
+    -fx-tab-max-width: 120px;
+    -fx-tab-min-height: 35px;
+}
+
+.dashboard-tabs .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.dashboard-tabs .tab {
+    -fx-background-color: #f0f2f5;
+    -fx-background-radius: 5 5 0 0;
+    -fx-border-color: transparent;
+    -fx-padding: 5 15;
+}
+
+.dashboard-tabs .tab:selected {
+    -fx-background-color: white;
+    -fx-background-radius: 5 5 0 0;
+    -fx-border-width: 0;
+}
+
+.dashboard-tabs .tab-content-area {
+    -fx-background-color: white;
+    -fx-background-radius: 0 5 5 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);
+    -fx-padding: 20;
+}
+
+.dashboard-tabs .tab-label {
+    -fx-text-fill: #555;
+    -fx-font-weight: normal;
+}
+
+.dashboard-tabs .tab:selected .tab-label {
+    -fx-text-fill: #4776E6;
+    -fx-font-weight: bold;
+}
+
+/* Dashboard Sections */
+.dashboard-section {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+/* Activity List */
+.activity-list {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 5;
+}
+
+.activity-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 5;
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+}
+
+.activity-list .list-cell:hover {
+    -fx-background-color: #f9f9f9;
+}
+
+/* Charts */
+.chart-series-line {
+    -fx-stroke: #4776E6;
+    -fx-stroke-width: 2px;
+}
+
+.chart-area-symbol {
+    -fx-background-color: #4776E6, white;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: #f0f0f0;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: #f0f0f0;
+}
+
+/* Skills Container */
+.skills-container {
+    -fx-padding: 10 0;
+}
+
+.skill-chip {
+    -fx-background-color: #f0f2f5;
+    -fx-background-radius: 15;
+    -fx-padding: 5 12;
+    -fx-alignment: center;
+}
+
+.skill-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555;
+}
+
+.skill-icon {
+    -fx-fill: #8E54E9;
+    -fx-font-size: 12px;
+}
+
+/* Stars Rating */
+.stars-container {
+    -fx-padding: 5 0 0 0;
+}
+
+.star-icon {
+    -fx-fill: gold;
+}
+
+
+
+.sidebar {
+    -fx-background-color: #2c4b50;
+    -fx-padding: 20;
+    -fx-spacing: 10;
+}
+
+.content-area {
+    -fx-padding: 20;
+}
+

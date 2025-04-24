@@ -1,37 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.shape.Rectangle?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="com.freelancer.ClientDashboardController" 
-            styleClass="dashboard-root">
-    <!-- Top Navigation -->
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.freelancer.ClientDashboardController"
+            prefHeight="700.0" prefWidth="1000.0"
+            stylesheets="/css/style.css">
+    
+    <!-- Top navigation bar -->
     <top>
-        <HBox spacing="10" style="-fx-background-color: #3f51b5; -fx-padding: 10;">
-            <Label text="Client Dashboard" style="-fx-font-size: 18px; -fx-text-fill: white; -fx-font-weight: bold;" />
-            <Region HBox.hgrow="ALWAYS" />
-            <Button text="🔔 Notifications" style="-fx-background-color: transparent; -fx-text-fill: white;" />
-            <Button text="🌙 Dark Mode" onAction="#toggleDarkMode" style="-fx-background-color: transparent; -fx-text-fill: white;" />
-            <MenuButton text="👤 Profile" styleClass="menu-button">
-                <items>
-                    <MenuItem text="Settings" styleClass="menu-item" />
-                    <MenuItem text="Help" styleClass="menu-item" />
-                    <MenuItem text="Logout" onAction="#handleLogout" styleClass="menu-item" />
-                </items>
-            </MenuButton>
+        <HBox styleClass="top-bar">
+            <padding>
+                <Insets top="15" right="20" bottom="15" left="20"/>
+            </padding>
+            <Label text="Freelancer Platform - Client Dashboard" styleClass="page-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Font icons for navigation -->
+            <HBox spacing="15" alignment="CENTER">
+                <!-- Profile icon -->
+                <StackPane styleClass="icon-container">
+                    <FontIcon fx:id="profileIcon" 
+                              iconLiteral="fas-user-circle" 
+                              iconSize="24" 
+                              onMouseClicked="#handleViewProfile" 
+                              styleClass="nav-icon"/>
+                </StackPane>
+                
+                <!-- Logout icon -->
+                <StackPane styleClass="icon-container">
+                    <FontIcon fx:id="logoutIcon" 
+                              iconLiteral="fas-sign-out-alt" 
+                              iconSize="24" 
+                              onMouseClicked="#handleLogout" 
+                              styleClass="nav-icon"/>
+                </StackPane>
+            </HBox>
         </HBox>
     </top>
-
-    <!-- Main Content -->
-    <center>
-        <VBox spacing="20" alignment="CENTER" style="-fx-padding: 20;">
-            <!-- Welcome Message -->
-            <Label fx:id="welcomeLabel" text="Welcome to Client Dashboard" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+    
+    <!-- RESTORED LEFT SIDEBAR -->
+    <left>
+        <VBox styleClass="sidebar">
+            <padding>
+                <Insets top="20" right="10" bottom="20" left="10"/>
+            </padding>
+            <Label text="Dashboard" styleClass="sidebar-heading"/>
             
-            <!-- Buttons for Features -->
-            <Button text="Post Project" onAction="#handlePostProject" />
-            <Button text="Manage Proposals" onAction="#handleManageProposals" />
-            <Button text="Make Payment" onAction="#handleMakePayment" />
+            <!-- Stats cards -->
+            <VBox spacing="15" styleClass="stats-container">
+                <HBox styleClass="stats-card">
+                    <VBox>
+                        <Label text="Total Projects" styleClass="stats-title"/>
+                        <Label fx:id="projectsCountLabel" text="0" styleClass="stats-value"/>
+                    </VBox>
+                </HBox>
+                
+                <HBox styleClass="stats-card">
+                    <VBox>
+                        <Label text="Active Projects" styleClass="stats-title"/>
+                        <Label fx:id="activeProjectsLabel" text="0" styleClass="stats-value"/>
+                    </VBox>
+                </HBox>
+                
+                <HBox styleClass="stats-card">
+                    <VBox>
+                        <Label text="Completed Projects" styleClass="stats-title"/>
+                        <Label fx:id="completedProjectsLabel" text="0" styleClass="stats-value"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+            
+            <Region VBox.vgrow="ALWAYS"/>
+            
+            <!-- RESTORED CREATE PROJECT BUTTON -->
+            <Button fx:id="createProjectButton" text="Create New Project" 
+                    onAction="#createNewProject" styleClass="primary-button"/>
+        </VBox>
+    </left>
+    
+    <!-- Main content area -->
+    <center>
+        <VBox spacing="10" styleClass="content-area">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="My Projects" styleClass="section-title">
+                    <font>
+                        <Font size="18" name="System Bold"/>
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS"/>
+                <!-- Search field removed per earlier request -->
+            </HBox>
+            
+            <!-- Projects table -->
+            <TableView fx:id="projectsTable" VBox.vgrow="ALWAYS" onMouseClicked="#handleProjectSelection">
+                <columns>
+                    <TableColumn fx:id="titleColumn" text="Project Title" prefWidth="250"/>
+                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                    <TableColumn fx:id="deadlineColumn" text="Deadline" prefWidth="150"/>
+                    <TableColumn fx:id="budgetColumn" text="Budget" prefWidth="150"/>
+                    <TableColumn fx:id="proposalsColumn" text="Proposals" prefWidth="100"/>
+                </columns>
+                <placeholder>
+                    <Label text="No projects yet. Create your first project!"/>
+                </placeholder>
+            </TableView>
         </VBox>
     </center>
 </BorderPane>
