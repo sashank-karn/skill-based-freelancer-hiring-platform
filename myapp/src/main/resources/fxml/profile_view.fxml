@@ -2,7 +2,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<?import org.kordamp.ikonli.javafx.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.freelancer.ProfileViewController" styleClass="profile-container">
@@ -31,62 +31,84 @@
             <Insets top="20" right="20" bottom="20" left="20"/>
         </padding>
 
-        <!-- User Info Section -->
         <GridPane vgap="15" hgap="10" styleClass="user-info-section">
-            <Label text="First Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <Label fx:id="nameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" minWidth="100" />
+                <ColumnConstraints hgrow="ALWAYS" />
+            </columnConstraints>
             
-            <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <Label fx:id="emailLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="First Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Label fx:id="nameLabel" GridPane.columnIndex="1" GridPane.rowIndex="0" />
             
-            <Label text="Role:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <Label fx:id="roleLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Label fx:id="emailLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             
-            <Label text="Password:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <HBox alignment="CENTER_LEFT" spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="1">
+            <Label text="Role:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Label fx:id="roleLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            
+            <Label text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <HBox alignment="CENTER_LEFT" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="3">
                 <Button text="Change Password" onAction="#showChangePasswordDialog"/>
             </HBox>
 
-            <Label text="Verification Status:" GridPane.rowIndex="4" GridPane.columnIndex="0"/> 
-            <HBox fx:id="verificationBox" spacing="5" GridPane.rowIndex="4" GridPane.columnIndex="1">
-                <Label fx:id="verificationLabel"/>
+            <HBox GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+                <VBox fx:id="verificationSection" visible="false" managed="false">
+                    <HBox spacing="5">
+                        <Label text="Verification Status:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox fx:id="verificationBox" spacing="5">
+                            <Label fx:id="verificationLabel" />
+                            <FontIcon fx:id="verificationIcon" 
+                                     iconLiteral="fas-check-circle" 
+                                     iconSize="16" 
+                                     styleClass="verification-icon"/>
+                        </HBox>
+                    </HBox>
+                </VBox>
             </HBox>
         </GridPane>
 
-        <!-- Skills and Files Tabs -->
-        <TabPane>
-            <Tab text="Skills" closable="false">
-                <VBox spacing="10">
-                    <TableView fx:id="skillsTable">
-                        <placeholder>
-                            <Label text="No skills added yet. Click 'Add New Skill' to add your first skill." />
-                        </placeholder>
-                        <columns>
-                            <TableColumn fx:id="skillNameColumn" text="Skill" prefWidth="200"/>
-                            <TableColumn fx:id="skillStatusColumn" text="Status" prefWidth="100"/>
-                        </columns>
-                    </TableView>
-                    <HBox spacing="10" alignment="CENTER">
-                        <Button text="Add New Skill" onAction="#showAddSkillDialog"/>
-                        <Button text="Update Selected Skill" onAction="#handleUpdateSkill" fx:id="updateSkillButton" disable="true"/>
-                        <Button text="Remove Selected Skill" onAction="#handleRemoveSkill" fx:id="removeSkillButton" disable="true"/>
-                    </HBox>
-                </VBox>
-            </Tab>
-            
-            <Tab text="Shared Files" closable="false">
-                <VBox spacing="10">
-                    <TableView fx:id="filesTable">
-                        <columns>
-                            <TableColumn fx:id="fileNameColumn" text="File Name"/>
-                            <TableColumn fx:id="fileSkillColumn" text="Associated Skill"/>
-                            <TableColumn fx:id="fileDateColumn" text="Upload Date"/>
-                            <TableColumn fx:id="fileActionColumn" text="Actions"/>
-                        </columns>
-                    </TableView>
-                    <Button text="Share New File" onAction="#showFileShareDialog"/>
-                </VBox>
-            </Tab>
-        </TabPane>
+        <VBox fx:id="skillsSection" visible="false" managed="false">
+            <TabPane fx:id="skillsTabPane">
+                <tabs>
+                    <Tab text="Skills" closable="false">
+                        <content>
+                            <VBox spacing="10">
+                                <TableView fx:id="skillsTable">
+                                    <placeholder>
+                                        <Label text="No skills added yet. Click 'Add New Skill' to add your first skill." />
+                                    </placeholder>
+                                    <columns>
+                                        <TableColumn fx:id="skillNameColumn" text="Skill" prefWidth="200"/>
+                                        <TableColumn fx:id="skillStatusColumn" text="Status" prefWidth="100"/>
+                                    </columns>
+                                </TableView>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Button text="Add New Skill" onAction="#showAddSkillDialog"/>
+                                    <Button text="Update Selected Skill" onAction="#handleUpdateSkill" fx:id="updateSkillButton" disable="true"/>
+                                    <Button text="Remove Selected Skill" onAction="#handleRemoveSkill" fx:id="removeSkillButton" disable="true"/>
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </Tab>
+                    
+                    <Tab text="Shared Files" closable="false">
+                        <content>
+                            <VBox spacing="10">
+                                <TableView fx:id="filesTable">
+                                    <columns>
+                                        <TableColumn fx:id="fileNameColumn" text="File Name"/>
+                                        <TableColumn fx:id="fileSkillColumn" text="Associated Skill"/>
+                                        <TableColumn fx:id="fileDateColumn" text="Upload Date"/>
+                                        <TableColumn fx:id="fileActionColumn" text="Actions"/>
+                                    </columns>
+                                </TableView>
+                                <Button text="Share New File" onAction="#showFileShareDialog"/>
+                            </VBox>
+                        </content>
+                    </Tab>
+                </tabs>
+            </TabPane>
+        </VBox>
     </VBox>
 </VBox>

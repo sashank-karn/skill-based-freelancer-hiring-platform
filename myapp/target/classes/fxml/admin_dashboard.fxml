@@ -5,7 +5,6 @@
 <BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="com.freelancer.AdminDashboardController" 
             styleClass="dashboard-root">
-    <!-- Top Navigation -->
     <top>
         <HBox spacing="10" style="-fx-background-color: #3f51b5; -fx-padding: 10;">
             <Label text="Admin Dashboard" style="-fx-font-size: 18px; -fx-text-fill: white; -fx-font-weight: bold;" />
@@ -22,13 +21,12 @@
         </HBox>
     </top>
 
-    <!-- Main Content -->
     <center>
         <VBox spacing="20" alignment="CENTER" style="-fx-padding: 20;">
-            <!-- Welcome Message -->
+    
             <Label fx:id="welcomeLabel" text="Welcome to Admin Dashboard" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
             
-            <!-- Buttons for Features -->
+    
             <Button text="Manage Users" onAction="#handleManageUsers" />
             <Button text="Manage Roles" onAction="#handleManageRoles" />
             <Button text="Skill Management" onAction="#handleSkillManagement" />

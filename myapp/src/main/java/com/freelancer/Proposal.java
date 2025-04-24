@@ -72,8 +72,30 @@ public class Proposal {
         this.status = new SimpleStringProperty(status);
     }
 
-    // Getters for basic types
-    public String getProposalId() {
+    
+    public Proposal(String proposalId, String projectId, int freelancerId, 
+                   String freelancerName, String bidAmount, String coverLetter, 
+                   String status, String submissionDate) {
+        this.proposalId = new SimpleStringProperty(proposalId);
+        this.projectId = new SimpleStringProperty(projectId);
+        this.projectTitle = new SimpleStringProperty(""); // Not provided in this constructor
+        this.freelancerId = new SimpleIntegerProperty(freelancerId);
+        this.freelancerName = new SimpleStringProperty(freelancerName);
+        
+        double bidValue = 0.0;
+        try {
+            bidValue = Double.parseDouble(bidAmount.replace("$", "").trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Could not parse bid amount: " + bidAmount);
+        }
+        
+        this.bidAmount = new SimpleDoubleProperty(bidValue);
+        this.coverLetter = new SimpleStringProperty(coverLetter);
+        this.timeline = new SimpleStringProperty(submissionDate); // Use submission date as timeline
+        this.status = new SimpleStringProperty(status);
+    }
+
+     public String getProposalId() {
         return proposalId.get();
     }
 
@@ -122,7 +144,6 @@ public class Proposal {
         return status.get();
     }
 
-    // Property getters for JavaFX binding
     public StringProperty proposalIdProperty() {
         return proposalId;
     }
@@ -159,7 +180,6 @@ public class Proposal {
         return status;
     }
 
-    // Setters
     public void setProposalId(String proposalId) {
         this.proposalId.set(proposalId);
     }

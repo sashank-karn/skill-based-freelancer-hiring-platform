@@ -18,12 +18,11 @@ public class FileShare {
     public StringProperty skillProperty() { return skill; }
     public StringProperty dateProperty() { return date; }
 
-    // These methods should reference existing properties instead of undefined variables
     public StringProperty fileNameProperty() {
-        return name; // Use the existing name property
+        return name; 
     }
 
     public StringProperty uploadDateProperty() {
-        return date; // Use the existing date property
+        return date; 
     }
 }

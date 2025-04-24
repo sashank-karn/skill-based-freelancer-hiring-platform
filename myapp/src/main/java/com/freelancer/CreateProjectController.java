@@ -21,20 +21,16 @@ public class CreateProjectController implements Initializable {
 
     @FXML private TextField titleField;
     @FXML private TextArea descriptionArea;
-    @FXML private TextField budgetField; // Changed from budgetMinField
+    @FXML private TextField budgetField;
     @FXML private DatePicker deadlinePicker;
     @FXML private ComboBox<String> categoryComboBox;
     
-    // Add these fields at the class level
     private int clientId;
     private ClientDashboardController parentController;
-    
-    // Add this field to store the session data
     private UserSession userSession;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Populate categories
         categoryComboBox.setItems(FXCollections.observableArrayList(
             "Web Development",
             "Mobile Development",
@@ -48,51 +44,33 @@ public class CreateProjectController implements Initializable {
             "Other"
         ));
         
-        // Set default value
         categoryComboBox.setValue("Web Development");
-        
-        // Set default deadline to 2 weeks from now
         deadlinePicker.setValue(LocalDate.now().plusWeeks(2));
         
-        // Add validation to budget field to only allow numbers and decimal point
         budgetField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*(\\.\\d*)?")) {
                 budgetField.setText(oldValue);
             }
         });
         
-        // Get the user session when controller initializes
         userSession = UserSession.getInstance();
-        
-        // You can display the user's name if needed
-        // userNameLabel.setText("Creating project as: " + userSession.getUserName());
     }
     
-    /**
-     * Sets the client ID for project creation
-     * @param clientId The ID of the client creating the project
-     */
     public void setClientId(int clientId) {
         this.clientId = clientId;
     }
 
-    /**
-     * Sets the parent controller for refreshing the project list after creation
-     * @param controller The parent ClientDashboardController instance
-     */
     public void setParentController(ClientDashboardController parentController) {
         this.parentController = parentController;
     }
     
     @FXML
     private void handleCancel(ActionEvent event) {
-        // Close the window
         ((Stage) titleField.getScene().getWindow()).close();
     }
     
     @FXML
     private void createNewProject(ActionEvent event) {
-        // Just call your existing method
         handleCreateProject(event);
     }
     
@@ -152,9 +130,8 @@ public class CreateProjectController implements Initializable {
         alert.showAndWait();
     }
     
-    // Add these helper methods to generate IDs
     private String generateClientId(Connection conn) throws SQLException {
-        String id = "C001"; // Default
+        String id = "C001";
         
         try {
             String query = "SELECT MAX(client_id) FROM Client WHERE client_id LIKE 'C%'";
@@ -174,39 +151,33 @@ public class CreateProjectController implements Initializable {
 
     private String generateProjectId(Connection conn) {
         try {
-            // First, check what's the highest existing project ID
             String query = "SELECT project_id FROM Projects ORDER BY LENGTH(project_id) DESC, project_id DESC LIMIT 1";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             
-            String newId = "P001"; // Default starting ID
+            String newId = "P001";
             
             if (rs.next()) {
                 String currentId = rs.getString("project_id");
                 System.out.println("Current highest project ID: " + currentId);
                 
-                // Try to extract the numeric part if it starts with 'P'
                 if (currentId != null && currentId.startsWith("P")) {
                     try {
                         int num = Integer.parseInt(currentId.substring(1));
                         newId = "P" + String.format("%03d", num + 1);
                     } catch (NumberFormatException e) {
-                        // If we can't parse the number, use timestamp
                         newId = "P" + System.currentTimeMillis() % 10000;
                     }
                 } else {
-                    // If format is unexpected, use timestamp
                     newId = "P" + System.currentTimeMillis() % 10000;
                 }
             }
             
-            // Double check the new ID doesn't exist
             PreparedStatement checkStmt = conn.prepareStatement("SELECT COUNT(*) FROM Projects WHERE project_id = ?");
             checkStmt.setString(1, newId);
             ResultSet checkRs = checkStmt.executeQuery();
             
             if (checkRs.next() && checkRs.getInt(1) > 0) {
-                // If duplicate found, use timestamp for guaranteed uniqueness
                 newId = "P" + System.currentTimeMillis() % 10000;
             }
             
@@ -215,7 +186,6 @@ public class CreateProjectController implements Initializable {
             
         } catch (SQLException e) {
             System.err.println("Error generating project ID: " + e.getMessage());
-            // Fallback to timestamp-based ID
             return "P" + System.currentTimeMillis() % 10000;
         }
     }
@@ -230,7 +200,6 @@ public class CreateProjectController implements Initializable {
         String description = descriptionArea.getText().trim();
         String category = categoryComboBox.getValue();
         
-        // Parse budget
         double budgetValue;
         try {
             budgetValue = Double.parseDouble(budgetField.getText().trim());
@@ -239,14 +208,11 @@ public class CreateProjectController implements Initializable {
             return;
         }
         
-        // Format deadline
         String deadline = deadlinePicker.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         
         System.out.println("Creating project with user ID: " + clientId);
         
-        // Save to database
         try (Connection conn = DBUtil.getConnection()) {
-            // First, check if client exists and get client_id
             String checkClientSQL = "SELECT client_id FROM client WHERE user_id = ?";
             PreparedStatement checkPs = conn.prepareStatement(checkClientSQL);
             checkPs.setInt(1, clientId);
@@ -257,11 +223,9 @@ public class CreateProjectController implements Initializable {
                 actualClientId = rs.getString("client_id");
                 System.out.println("Using existing client_id: " + actualClientId);
             } else {
-                // Generate a new client ID
                 actualClientId = generateClientId(conn);
                 System.out.println("Generated new client_id: " + actualClientId);
                 
-                // Insert the new client
                 String insertClientSQL = "INSERT INTO client (client_id, user_id, name) VALUES (?, ?, ?)";
                 PreparedStatement insertPs = conn.prepareStatement(insertClientSQL);
                 insertPs.setString(1, actualClientId);
@@ -272,10 +236,8 @@ public class CreateProjectController implements Initializable {
                 System.out.println("Created new client record with ID: " + actualClientId);
             }
             
-            // Generate a unique project ID
             String projectId = generateProjectId(conn);
             
-            // Create project with the client_id (which is a string)
             String insertSQL = "INSERT INTO Projects (project_id, client_id, title, description, category, status, budget, deadline) " +
                          "VALUES (?, ?, ?, ?, ?, 'Open', ?, ?)";
             

@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -180,6 +181,9 @@ budgetColumn.setCellValueFactory(cellData -> cellData.getValue().formattedBudget
         
         // Set the projects in the table
         projectsTable.setItems(projectsList);
+        
+        // Add this line to update the proposal counts
+        updateProjectProposalCounts();
         
     } catch (Exception e) {
         e.printStackTrace();
@@ -384,20 +388,23 @@ budgetColumn.setCellValueFactory(cellData -> cellData.getValue().formattedBudget
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profile_view.fxml"));
             Parent root = loader.load();
             
+            // Get controller and set properties
             ProfileViewController controller = loader.getController();
             controller.setUserId(userId);
-            controller.setUserRole("client");  // Explicitly set as client
+            controller.setUserRole("client"); // Explicitly set role to client
             
+            // Set up the scene
             Scene scene = new Scene(root);
             StyleManager.applyStylesheets(scene);
             
-            Stage stage = (Stage) projectsTable.getScene().getWindow();
-            stage.setScene(scene);
+            // Get the current stage and show the profile view
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setTitle("Profile");
+            stage.setScene(scene);
             stage.show();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not open profile: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load profile view: " + e.getMessage());
         }
     }
     
@@ -473,5 +480,23 @@ private void updateProjectCounts(int total, int active, int completed) {
 // Add this helper method for defaults
 private void updateProjectCountsWithDefaults() {
     updateProjectCounts(0, 0, 0);
+}
+
+private void updateProjectProposalCounts() {
+    try (Connection conn = DBUtil.getConnection()) {
+        for (Project project : projectsList) {
+            String sql = "SELECT COUNT(*) as count FROM Proposals WHERE project_id = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, project.getProjectId());
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                int count = rs.getInt("count");
+                project.setProposalCount(count);
+            }
+        }
+    } catch (Exception e) {
+        System.err.println("Error updating proposal counts: " + e.getMessage());
+    }
 }
 }

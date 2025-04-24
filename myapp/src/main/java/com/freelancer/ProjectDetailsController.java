@@ -1,253 +1,298 @@
 package com.freelancer;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import javafx.event.ActionEvent;
+import javafx.util.Callback;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.sql.*;
 import java.util.Optional;
-import java.util.ResourceBundle;
+import javafx.stage.Modality;
+import javafx.beans.property.SimpleStringProperty;
 
-public class ProjectDetailsController implements Initializable {
-
+public class ProjectDetailsController {
     @FXML private Label titleLabel;
     @FXML private Label statusLabel;
-    @FXML private Label categoryLabel;
+    @FXML private Label descriptionLabel;
     @FXML private Label budgetLabel;
     @FXML private Label deadlineLabel;
-    @FXML private Label dateCreatedLabel;
-    @FXML private TextArea descriptionArea;
-    @FXML private TextArea descriptionText;
-    @FXML private Label proposalsLabel;
+    @FXML private Label freelancerNameLabel;
+    @FXML private Label ratingLabel;
     
+    @FXML private VBox proposalsSection;
+    @FXML private VBox freelancerSection;
     @FXML private TableView<Proposal> proposalsTable;
     @FXML private TableColumn<Proposal, String> freelancerColumn;
-    @FXML private TableColumn<Proposal, String> bidColumn;
-    @FXML private TableColumn<Proposal, String> messageColumn;
-    @FXML private TableColumn<Proposal, String> actionColumn;
-
-    private ObservableList<Proposal> proposalsList = FXCollections.observableArrayList();
+    @FXML private TableColumn<Proposal, String> bidAmountColumn;
+    @FXML private TableColumn<Proposal, String> dateColumn;
+    @FXML private TableColumn<Proposal, String> statusColumn;
+    @FXML private TableColumn<Proposal, Button> actionsColumn;
+    
+    @FXML private Button editButton;
+    @FXML private Button deleteButton;
+    @FXML private Button completeButton;
+    
     private Project project;
     private int clientId;
     private ClientDashboardController parentController;
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initial setup for proposal table columns
-        setupProposalsTable();
-    }
+    private ObservableList<Proposal> proposalsList = FXCollections.observableArrayList();
     
-    private void setupProposalsTable() {
-        // Check if proposalsTable exists in this view
-        if (proposalsTable != null) {
-            freelancerColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFreelancerName()));
-            bidColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFormattedBidAmount()));
-            messageColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCoverLetter()));
-            
-            // Setup action column with Accept/Reject buttons
-            actionColumn.setCellFactory(col -> new TableCell<Proposal, String>() {
-                final Button acceptButton = new Button("Accept");
-                final Button rejectButton = new Button("Reject");
-                final HBox buttonsBox = new HBox(5, acceptButton, rejectButton);
-                
-                {
-                    acceptButton.getStyleClass().add("accept-button");
-                    rejectButton.getStyleClass().add("reject-button");
-                    
-                    acceptButton.setOnAction(event -> {
-                        Proposal proposal = getTableRow().getItem();
-                        if (proposal != null) {
-                            handleAcceptProposal(proposal);
-                        }
-                    });
-                    
-                    rejectButton.setOnAction(event -> {
-                        Proposal proposal = getTableRow().getItem();
-                        if (proposal != null) {
-                            handleRejectProposal(proposal);
-                        }
-                    });
-                }
-                
-                @Override
-                protected void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || getTableRow().getItem() == null) {
-                        setGraphic(null);
-                    } else {
-                        setGraphic(buttonsBox);
-                    }
-                }
-            });
-            
-            proposalsTable.setItems(proposalsList);
-        }
+    public void setProject(Project project) {
+        this.project = project;
+        displayProjectDetails();
     }
     
     public void setClientId(int clientId) {
         this.clientId = clientId;
     }
-
+    
     public void setParentController(ClientDashboardController controller) {
         this.parentController = controller;
     }
-
-    public void setProject(Project project) {
-        this.project = project;
-        populateProjectDetails();
+    
+    private void displayProjectDetails() {
+        titleLabel.setText(project.getTitle());
+        descriptionLabel.setText(project.getDescription());
+        statusLabel.setText(project.getStatus());
+        
+        budgetLabel.setText(String.format("$%.2f", project.getBudget()));
+        
+        deadlineLabel.setText(project.getDeadline());
+        
+        StyleManager.applyStatusStyle(statusLabel, project.getStatus());
+        
+        loadProposals(project.getProjectId());
+        
+        setupProposalTable();
+        
+        updateAssignedFreelancerVisibility();
     }
     
-    private void populateProjectDetails() {
-        if (project != null) {
-            titleLabel.setText(project.getTitle());
-            descriptionText.setText(project.getDescription());
-            statusLabel.setText(project.getStatus());
-            budgetLabel.setText(project.getFormattedBudget());
-            deadlineLabel.setText(project.getDeadline());
-            
-            loadProposals(project.getProjectId());
-        }
+    private void setupProposalTable() {
+        freelancerColumn.setCellValueFactory(cellData -> cellData.getValue().freelancerNameProperty());
+        
+        bidAmountColumn.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getFormattedBidAmount()));
+        
+        dateColumn.setCellValueFactory(cellData -> cellData.getValue().timelineProperty());
+        
+        statusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
+        
+        statusColumn.setCellFactory(column -> StyleManager.createStatusCell(column));
+        
+        actionsColumn.setCellFactory(new Callback<TableColumn<Proposal, Button>, TableCell<Proposal, Button>>() {
+            @Override
+            public TableCell<Proposal, Button> call(TableColumn<Proposal, Button> param) {
+                return new TableCell<Proposal, Button>() {
+                    @Override
+                    protected void updateItem(Button item, boolean empty) {
+                        super.updateItem(item, empty);
+                        
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            Proposal proposal = getTableView().getItems().get(getIndex());
+                            
+                            if ("Pending".equalsIgnoreCase(proposal.getStatus())) {
+                                HBox actionBox = new HBox(5);
+                                
+                                Button acceptButton = new Button("Accept");
+                                acceptButton.getStyleClass().add("action-button");
+                                acceptButton.setOnAction(event -> handleAcceptProposal(proposal));
+                                
+                                Button rejectButton = new Button("Reject");
+                                rejectButton.getStyleClass().add("action-button");
+                                rejectButton.setOnAction(event -> handleRejectProposal(proposal));
+                                
+                                actionBox.getChildren().addAll(acceptButton, rejectButton);
+                                setGraphic(actionBox);
+                            } else {
+                                setGraphic(null);
+                            }
+                        }
+                    }
+                };
+            }
+        });
+        
+        proposalsTable.setItems(proposalsList);
     }
     
     private void loadProposals(String projectId) {
         proposalsList.clear();
         
         try (Connection conn = DBUtil.getConnection()) {
-            String sql = "SELECT p.*, u.name as freelancer_name " +
-                        "FROM Proposals p " +
-                        "JOIN Users u ON p.freelancer_id = u.user_id " +
-                        "WHERE p.project_id = ?";
+            String sql = "SELECT p.proposal_id, p.project_id, p.user_id AS freelancer_id, p.bid_amount, " +
+                    "p.timeline, p.status, p.submission_date, u.name as freelancer_name " +
+                    "FROM Proposals p " +
+                    "JOIN Users u ON p.user_id = u.user_id " +
+                    "WHERE p.project_id = ?";
             
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, projectId);
             ResultSet rs = ps.executeQuery();
             
             while (rs.next()) {
+                String proposalId = rs.getString("proposal_id");
+                int freelancerId = rs.getInt("freelancer_id");
+                String freelancerName = rs.getString("freelancer_name");
+                double bidAmount = rs.getDouble("bid_amount");
+                String timeline = rs.getString("timeline");
+                String status = rs.getString("status");
+                String date = rs.getString("submission_date");
+                
                 Proposal proposal = new Proposal(
-                    rs.getInt("proposal_id"),
-                    rs.getString("project_id"),
-                    rs.getInt("freelancer_id"),
-                    rs.getDouble("bid_amount"),
-                    rs.getString("cover_letter"),
-                    rs.getString("status"),
-                    rs.getString("freelancer_name")
+                    proposalId, 
+                    projectId, 
+                    null,  
+                    freelancerId,
+                    freelancerName,
+                    bidAmount,
+                    timeline,  
+                    date,
+                    status
                 );
+                
                 proposalsList.add(proposal);
             }
-            
-            // Update UI based on proposal count
-            if (proposalsList.isEmpty()) {
-                proposalsLabel.setText("No proposals yet");
-            } else {
-                proposalsLabel.setText("Proposals (" + proposalsList.size() + ")");
-            }
-            
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not load proposals: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Database Error", 
+                    "Could not load proposals: " + e.getMessage());
         }
     }
     
-    private void loadProposals() {
-        if (project != null) {
-            loadProposals(project.getProjectId());
-        }
-    }
-    
-    private void handleAcceptProposal(Proposal proposal) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Accept Proposal");
-        alert.setHeaderText("Accept proposal from " + proposal.getFreelancerName() + "?");
-        alert.setContentText("This will change the project status to 'In Progress' and notify the freelancer.");
+    private void updateAssignedFreelancerVisibility() {
+        boolean isAssigned = "In Progress".equalsIgnoreCase(project.getStatus()) || 
+                            "Completed".equalsIgnoreCase(project.getStatus());
         
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
+        freelancerSection.setVisible(isAssigned);
+        freelancerSection.setManaged(isAssigned);
+        
+        if (isAssigned) {
             try (Connection conn = DBUtil.getConnection()) {
-                // Update proposal status
-                String updateProposalSql = "UPDATE Proposals SET status = 'Accepted' WHERE proposal_id = ?";
-                PreparedStatement psProposal = conn.prepareStatement(updateProposalSql);
-                // Fix: Use Integer.parseInt to convert the String to int
-                psProposal.setInt(1, Integer.parseInt(proposal.getProposalId()));
-                psProposal.executeUpdate();
+                String sql = "SELECT assigned_freelancer_name FROM Projects WHERE project_id = ?";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ps.setString(1, project.getProjectId());
+                ResultSet rs = ps.executeQuery();
                 
-                // Update project status and assign freelancer
-                String updateProjectSql = "UPDATE Projects SET status = 'In Progress', " +
-                                          "assigned_freelancer_id = ?, assigned_freelancer_name = ? " +
-                                          "WHERE project_id = ?";
-                PreparedStatement psProject = conn.prepareStatement(updateProjectSql);
-                psProject.setInt(1, proposal.getFreelancerId());
-                psProject.setString(2, proposal.getFreelancerName());
-                psProject.setString(3, project.getProjectId());
-                psProject.executeUpdate();
-                
-                // Update status of all other proposals for this project
-                String rejectOthersSql = "UPDATE Proposals SET status = 'Rejected' " +
-                                         "WHERE project_id = ? AND proposal_id != ?";
-                PreparedStatement psReject = conn.prepareStatement(rejectOthersSql);
-                psReject.setString(1, project.getProjectId());
-                // Fix: Use Integer.parseInt for the proposal ID here too
-                psReject.setInt(2, Integer.parseInt(proposal.getProposalId()));
-                psReject.executeUpdate();
-                
-                // Refresh proposals and project details
-                loadProposals(project.getProjectId());
-                
-                // Update project status in UI
-                statusLabel.setText("In Progress");
-                project.setStatus("In Progress");
-                
-                // Update parent controller if available
-                if (parentController != null) {
-                    parentController.refreshProjects();
+                if (rs.next()) {
+                    String freelancerName = rs.getString("assigned_freelancer_name");
+                    if (freelancerName != null && !freelancerName.isEmpty()) {
+                        freelancerNameLabel.setText(freelancerName);
+                    }
                 }
-                
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Proposal accepted successfully!");
             } catch (Exception e) {
                 e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Error", "Could not accept proposal: " + e.getMessage());
+            }
+        }
+        
+        boolean shouldShowProposals = "Open".equalsIgnoreCase(project.getStatus());
+        proposalsSection.setVisible(shouldShowProposals);
+        proposalsSection.setManaged(shouldShowProposals);
+        
+        boolean canModify = "Open".equalsIgnoreCase(project.getStatus());
+        editButton.setDisable(!canModify);
+        deleteButton.setDisable(!canModify);
+    }
+    
+    @FXML
+    private void handleAcceptProposal(Proposal proposal) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Accept Proposal");
+        confirmAlert.setHeaderText("Accept Proposal from " + proposal.getFreelancerName());
+        confirmAlert.setContentText("Are you sure you want to accept this proposal? All other proposals will be rejected.");
+        StyleManager.styleAlert(confirmAlert);
+        
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try (Connection conn = DBUtil.getConnection()) {
+                conn.setAutoCommit(false);
+                
+                try {
+                    String updateProposalSql = "UPDATE Proposals SET status = 'Accepted' WHERE proposal_id = ?";
+                    PreparedStatement psProposal = conn.prepareStatement(updateProposalSql);
+                    psProposal.setString(1, proposal.getProposalId());
+                    psProposal.executeUpdate();
+                    
+                    String updateProjectSql = "UPDATE Projects SET status = 'In Progress', " +
+                                             "assigned_freelancer_id = ?, assigned_freelancer_name = ? " +
+                                             "WHERE project_id = ?";
+                    PreparedStatement psProject = conn.prepareStatement(updateProjectSql);
+                    psProject.setInt(1, proposal.getFreelancerId());
+                    psProject.setString(2, proposal.getFreelancerName());
+                    psProject.setString(3, project.getProjectId());
+                    psProject.executeUpdate();
+                    
+                    String rejectOthersSql = "UPDATE Proposals SET status = 'Rejected' " +
+                                             "WHERE project_id = ? AND proposal_id != ?";
+                    PreparedStatement psReject = conn.prepareStatement(rejectOthersSql);
+                    psReject.setString(1, project.getProjectId());
+                    psReject.setString(2, proposal.getProposalId());
+                    psReject.executeUpdate();
+                    
+                    conn.commit();
+                    
+                    project.setStatus("In Progress");
+                    statusLabel.setText("In Progress");
+                    StyleManager.applyStatusStyle(statusLabel, "In Progress");
+                    updateAssignedFreelancerVisibility();
+                    loadProposals(project.getProjectId());
+                    
+                    if (parentController != null) {
+                        parentController.refreshProjects();
+                    }
+                    
+                    showAlert(Alert.AlertType.INFORMATION, "Success", 
+                            "Proposal accepted. The freelancer will be notified.");
+                    
+                } catch (Exception e) {
+                    conn.rollback();
+                    throw e;
+                } finally {
+                    conn.setAutoCommit(true);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Error", 
+                        "Could not accept proposal: " + e.getMessage());
             }
         }
     }
     
+    @FXML
     private void handleRejectProposal(Proposal proposal) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Reject Proposal");
-        alert.setHeaderText("Reject proposal from " + proposal.getFreelancerName() + "?");
-        alert.setContentText("The freelancer will be notified that their proposal was rejected.");
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Reject Proposal");
+        confirmAlert.setHeaderText("Reject Proposal from " + proposal.getFreelancerName());
+        confirmAlert.setContentText("Are you sure you want to reject this proposal?");
+        StyleManager.styleAlert(confirmAlert);
         
-        Optional<ButtonType> result = alert.showAndWait();
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try (Connection conn = DBUtil.getConnection()) {
-                // Update proposal status
                 String updateProposalSql = "UPDATE Proposals SET status = 'Rejected' WHERE proposal_id = ?";
                 PreparedStatement ps = conn.prepareStatement(updateProposalSql);
-                // Fix: Use Integer.parseInt to convert the String to int
-                ps.setInt(1, Integer.parseInt(proposal.getProposalId()));
-                ps.executeUpdate();
+                ps.setString(1, proposal.getProposalId());
+                int rowsUpdated = ps.executeUpdate();
                 
-                // Refresh proposals
-                loadProposals(project.getProjectId());
-                
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Proposal rejected successfully!");
+                if (rowsUpdated > 0) {
+                    loadProposals(project.getProjectId());
+                    
+                    showAlert(Alert.AlertType.INFORMATION, "Success", 
+                            "Proposal rejected.");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Error", "Could not reject proposal: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Error", 
+                        "Could not reject proposal: " + e.getMessage());
             }
         }
     }
@@ -261,109 +306,121 @@ public class ProjectDetailsController implements Initializable {
             EditProjectController controller = loader.getController();
             controller.setProject(project);
             controller.setClientId(clientId);
+            
             controller.setParentControllers(this, parentController);
             
             Scene scene = new Scene(root);
             StyleManager.applyStylesheets(scene);
             
             Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(scene);
-            stage.setTitle("Edit Project");
-            stage.show();
+            stage.setTitle("Edit Project: " + project.getTitle());
+            stage.showAndWait();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not open edit project window: " + e.getMessage());
-        }
-    }
-    
-    @FXML
-    private void handleCloseProject() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Close Project");
-        alert.setHeaderText("Are you sure you want to close this project?");
-        alert.setContentText("This will mark the project as completed and no more proposals will be accepted.");
-        
-        StyleManager.styleAlert(alert);
-        
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try (Connection conn = DBUtil.getConnection()) {
-                String sql = "UPDATE Projects SET status = 'Completed', completion_date = CURRENT_DATE WHERE project_id = ?";
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setString(1, project.getProjectId());
-                int rowsAffected = ps.executeUpdate();
-                
-                if (rowsAffected > 0) {
-                    project.setStatus("Completed");
-                    populateProjectDetails();
-                    
-                    // Update parent controller
-                    if (parentController != null) {
-                        parentController.refreshProjects();
-                    }
-                    
-                    showAlert(Alert.AlertType.INFORMATION, "Success", "Project has been marked as completed.");
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Error", "Could not update project status.");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Database Error", "Could not close project: " + e.getMessage());
-            }
+            showAlert(Alert.AlertType.ERROR, "Error", 
+                    "Could not open edit project window: " + e.getMessage());
         }
     }
     
     @FXML
     private void handleDeleteProject() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Project");
-        alert.setHeaderText("Are you sure you want to delete this project?");
-        alert.setContentText("This action cannot be undone. All associated proposals will also be deleted.");
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Delete Project");
+        confirmAlert.setHeaderText("Delete Project: " + project.getTitle());
+        confirmAlert.setContentText("Are you sure you want to delete this project? This action cannot be undone.");
+        StyleManager.styleAlert(confirmAlert);
         
-        StyleManager.styleAlert(alert);
+        Optional<ButtonType> result = confirmAlert.showAndWait();
         
-        Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try (Connection conn = DBUtil.getConnection()) {
                 conn.setAutoCommit(false);
                 
-                // First delete related proposals
-                String deleteProposalsSql = "DELETE FROM Proposals WHERE project_id = ?";
-                PreparedStatement psProposals = conn.prepareStatement(deleteProposalsSql);
-                psProposals.setString(1, project.getProjectId());
-                psProposals.executeUpdate();
-                
-                // Then delete the project
-                String deleteProjectSql = "DELETE FROM Projects WHERE project_id = ?";
-                PreparedStatement psProject = conn.prepareStatement(deleteProjectSql);
-                psProject.setString(1, project.getProjectId());
-                int rowsAffected = psProject.executeUpdate();
-                
-                conn.commit();
-                
-                if (rowsAffected > 0) {
-                    // Close this window
-                    ((Stage) titleLabel.getScene().getWindow()).close();
+                try {
+                    String deleteProposalsSql = "DELETE FROM Proposals WHERE project_id = ?";
+                    PreparedStatement psProposals = conn.prepareStatement(deleteProposalsSql);
+                    psProposals.setString(1, project.getProjectId());
+                    psProposals.executeUpdate();
                     
-                    // Update parent
-                    if (parentController != null) {
-                        parentController.refreshProjects();
+                    String deleteProjectSql = "DELETE FROM Projects WHERE project_id = ?";
+                    PreparedStatement psProject = conn.prepareStatement(deleteProjectSql);
+                    psProject.setString(1, project.getProjectId());
+                    int rowsDeleted = psProject.executeUpdate();
+                    
+                    conn.commit();
+                    
+                    if (rowsDeleted > 0) {
+                        if (parentController != null) {
+                            parentController.refreshProjects();
+                        }
+                        
+                        Stage stage = (Stage) titleLabel.getScene().getWindow();
+                        stage.close();
                     }
-                    
-                    showAlert(Alert.AlertType.INFORMATION, "Success", "Project has been deleted successfully.");
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Error", "Could not delete project.");
+                } catch (Exception e) {
+                    conn.rollback();
+                    throw e;
+                } finally {
+                    conn.setAutoCommit(true);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Database Error", "Could not delete project: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Error", 
+                        "Could not delete project: " + e.getMessage());
             }
         }
     }
     
     @FXML
+    private void handleMarkComplete() {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Complete Project");
+        confirmAlert.setHeaderText("Mark Project as Complete");
+        confirmAlert.setContentText("Are you sure you want to mark this project as complete?");
+        StyleManager.styleAlert(confirmAlert);
+        
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try (Connection conn = DBUtil.getConnection()) {
+                String sql = "UPDATE Projects SET status = 'Completed', completion_date = CURRENT_TIMESTAMP WHERE project_id = ?";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ps.setString(1, project.getProjectId());
+                int rowsUpdated = ps.executeUpdate();
+                
+                if (rowsUpdated > 0) {
+                    statusLabel.setText("Completed");
+                    StyleManager.applyStatusStyle(statusLabel, "Completed");
+                    project.setStatus("Completed");
+                    updateAssignedFreelancerVisibility();
+                    
+                    if (parentController != null) {
+                        parentController.refreshProjects();
+                    }
+                    
+                    showAlert(Alert.AlertType.INFORMATION, "Success", 
+                            "Project marked as complete.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Error", 
+                        "Could not complete project: " + e.getMessage());
+            }
+        }
+    }
+    
+    @FXML
+    private void handleMessageFreelancer() {
+        showAlert(Alert.AlertType.INFORMATION, "Feature Coming Soon", 
+                "Messaging functionality will be available in a future update.");
+    }
+    
+    @FXML
     private void handleClose() {
-        ((Stage) titleLabel.getScene().getWindow()).close();
+        Stage stage = (Stage) titleLabel.getScene().getWindow();
+        stage.close();
     }
     
     private void showAlert(Alert.AlertType type, String title, String content) {
@@ -375,9 +432,12 @@ public class ProjectDetailsController implements Initializable {
         alert.showAndWait();
     }
     
-    // Method for external controllers to refresh this view
-    public void refreshProject() {
-        populateProjectDetails();
-        loadProposals();
+    public void refreshProjectDetails(Project updatedProject) {
+        this.project = updatedProject;
+        displayProjectDetails();
+    }
+    
+    public void refreshProject(Project updatedProject) {
+        refreshProjectDetails(updatedProject);
     }
 }

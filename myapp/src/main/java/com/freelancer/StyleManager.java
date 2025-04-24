@@ -264,4 +264,31 @@ public class StyleManager {
         
         return header;
     }
+    
+    public static void applyStatusStyle(Label statusLabel, String status) {
+        if (statusLabel == null || status == null) return;
+        
+        statusLabel.getStyleClass().removeAll("status-open", "status-pending", "status-in-progress", 
+                                              "status-completed", "status-cancelled", "status-approved", 
+                                              "status-rejected", "status-verified");
+        
+        String lowerStatus = status.toLowerCase();
+        if (lowerStatus.contains("open") || lowerStatus.contains("active")) {
+            statusLabel.getStyleClass().add("status-open");
+        } else if (lowerStatus.contains("pend") || lowerStatus.contains("wait")) {
+            statusLabel.getStyleClass().add("status-pending");
+        } else if (lowerStatus.contains("progress") || lowerStatus.contains("ongoing")) {
+            statusLabel.getStyleClass().add("status-in-progress");
+        } else if (lowerStatus.contains("complet") || lowerStatus.contains("done") || lowerStatus.contains("finish")) {
+            statusLabel.getStyleClass().add("status-completed");
+        } else if (lowerStatus.contains("cancel")) {
+            statusLabel.getStyleClass().add("status-cancelled");
+        } else if (lowerStatus.contains("approv") || lowerStatus.contains("accept")) {
+            statusLabel.getStyleClass().add("status-approved");
+        } else if (lowerStatus.contains("reject") || lowerStatus.contains("declin")) {
+            statusLabel.getStyleClass().add("status-rejected");
+        } else if (lowerStatus.contains("verif")) {
+            statusLabel.getStyleClass().add("status-verified");
+        }
+    }
 }

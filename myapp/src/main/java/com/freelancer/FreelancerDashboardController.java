@@ -3,6 +3,8 @@ package com.freelancer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -11,6 +13,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -83,19 +86,16 @@ public class FreelancerDashboardController {
 
     @FXML
     private void initialize() {
-        // Hide the back button by default
         if (backButton != null) {
             backButton.setVisible(false);
         }
 
         initializeTableColumns();
         
-        // Don't load data yet - wait for userId to be set
         initialized = true;
     }
     
     private void initializeTableColumns() {
-        // Initialize table columns only if they exist
         if (colProjectId != null) {
             colProjectId.setCellValueFactory(cellData -> cellData.getValue().projectIdProperty());
         }
@@ -160,12 +160,10 @@ public class FreelancerDashboardController {
             colProposalStatus.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
         }
 
-        // Set up cell factories for text wrapping
         setupCellFactories();
     }
     
     private void setupCellFactories() {
-        // Set up cell factories for text wrapping only if columns exist
         if (colProposalProject != null) {
             colProposalProject.setCellFactory(tc -> {
                 TableCell<Proposal, String> cell = new TableCell<>() {
@@ -211,7 +209,6 @@ public class FreelancerDashboardController {
             welcomeLabel.setText("Welcome, " + userName);
         }
         
-        // Load data if user ID is already set
         if (userId > 0) {
             loadAllData();
         }
@@ -220,7 +217,6 @@ public class FreelancerDashboardController {
     public void setUserId(int userId) {
         this.userId = userId;
         
-        // Only load data if already initialized
         if (initialized && userId > 0) {
             loadAllData();
         }
@@ -293,7 +289,6 @@ public class FreelancerDashboardController {
             return;
         }
         
-        // First check which table view is actually in your UI
         TableView<Proposal> targetTable = null;
         
         if (proposalsTable != null) {
@@ -303,7 +298,7 @@ public class FreelancerDashboardController {
         }
         
         if (targetTable != null) {
-            targetTable.getItems().clear(); // Clear the table before loading new data
+            targetTable.getItems().clear();
             
             try (Connection conn = DBUtil.getConnection()) {
                 String sql = "SELECT Pr.proposal_id, Pr.project_id, P.title AS project_title, Pr.bid_amount, Pr.timeline, Pr.status " +
@@ -327,10 +322,8 @@ public class FreelancerDashboardController {
                     ));
                 }
                 
-                // Provide feedback if no data was found
                 if (!dataLoaded) {
                     System.out.println("No proposals found for user ID: " + userId);
-                    // Optionally update a label in the UI to show "No proposals found"
                     if (proposalsErrorLabel != null) {
                         proposalsErrorLabel.setText("No proposals found");
                         proposalsErrorLabel.setVisible(true);
@@ -412,7 +405,6 @@ public class FreelancerDashboardController {
             return;
         }
         
-        // Open a file chooser dialog
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select File to Upload");
         fileChooser.getExtensionFilters().addAll(
@@ -424,14 +416,12 @@ public class FreelancerDashboardController {
         File selectedFile = fileChooser.showOpenDialog(filesTableView.getScene().getWindow());
         if (selectedFile != null) {
             try (Connection conn = DBUtil.getConnection()) {
-                // Insert the file record into the database
                 String sql = "INSERT INTO Files (file_name, user_id, upload_date) VALUES (?, ?, NOW())";
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, selectedFile.getName());
                 ps.setInt(2, userId);
                 ps.executeUpdate();
 
-                // Refresh the files table
                 loadFiles();
 
                 showAlert("File uploaded successfully!");
@@ -467,7 +457,6 @@ public class FreelancerDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(message);
 
-        // Apply custom CSS to the alert
         styleAlert(alert);
 
         alert.showAndWait();
@@ -489,28 +478,35 @@ public class FreelancerDashboardController {
 
     @FXML
     private void handleLogout(MouseEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
-            Parent root = loader.load();
-
-            // Get any control in the scene to access the window
-            Control control = backButton != null ? backButton : welcomeLabel;
-            if (control == null) {
-                throw new RuntimeException("No control available to access scene window");
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Logout Confirmation");
+        alert.setHeaderText("Are you sure you want to logout?");
+        StyleManager.styleAlert(alert);
+        
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                UserSession.getInstance().clear();
+                
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+                Parent root = loader.load();
+                Scene scene = new Scene(root);
+                StyleManager.applyStylesheets(scene);
+                
+                // Fix: Get the current scene more safely
+                // Use the event source to get the scene instead of possibly null projectsTableView
+                Node sourceNode = (Node) event.getSource();
+                Stage stage = (Stage) sourceNode.getScene().getWindow();
+                
+                stage.setScene(scene);
+                stage.setTitle("Freelancer Login");
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert("Error: Could not return to login page: " + e.getMessage());
             }
-            
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) control.getScene().getWindow();
-            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-            stage.setScene(scene);
-            stage.setTitle("Login");
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("An error occurred while logging out: " + e.getMessage());
         }
     }
-
     @FXML
     private void openProfile(MouseEvent event) {
         try {
@@ -518,7 +514,7 @@ public class FreelancerDashboardController {
             Parent root = loader.load();
             
             ProfileViewController controller = loader.getController();
-            controller.setUserId(userId); // Pass the user ID
+            controller.setUserId(userId);
             
             Scene scene = new Scene(root);
             scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
@@ -540,20 +536,16 @@ public class FreelancerDashboardController {
         }
         
         try {
-            // Create a dialog to display skills
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Skills");
             dialog.setHeaderText("Your Skills");
 
-            // Create a ListView to display skills
             ListView<String> skillsList = new ListView<>();
-            skillsList.setItems(skillsListView.getItems()); // Use the existing skillsListView items
+            skillsList.setItems(skillsListView.getItems());
 
-            // Add the ListView to the dialog
             dialog.getDialogPane().setContent(skillsList);
             dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
 
-            // Apply custom CSS to the dialog
             styleDialog(dialog);
 
             dialog.showAndWait();
@@ -571,7 +563,6 @@ public class FreelancerDashboardController {
         }
         
         try {
-            // Switch to the "Browse Projects" tab
             tabPane.getSelectionModel().select(projectsTab);
         } catch (Exception e) {
             e.printStackTrace();
@@ -587,7 +578,6 @@ public class FreelancerDashboardController {
             return;
         }
         
-        // Validate that a project is selected
         Project selectedProject = browseProjectsTable.getSelectionModel().getSelectedItem();
         if (selectedProject == null) {
             browseProjectsErrorLabel.setText("Please select a project to apply.");
@@ -596,7 +586,6 @@ public class FreelancerDashboardController {
         }
         browseProjectsErrorLabel.setVisible(false);
 
-        // Validate bid amount and timeline
         String bidAmount = bidAmountField.getText();
         String timeline = timelineField.getText();
 
@@ -619,7 +608,6 @@ public class FreelancerDashboardController {
             return;
         }
 
-        // Save the proposal to the database
         try (Connection conn = DBUtil.getConnection()) {
             String sql = "INSERT INTO Proposals (project_id, user_id, bid_amount, timeline, status) VALUES (?, ?, ?, ?, 'Pending')";
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -633,7 +621,6 @@ public class FreelancerDashboardController {
             bidAmountField.clear();
             timelineField.clear();
             
-            // Refresh proposals display
             loadProposals();
         } catch (Exception e) {
             e.printStackTrace();
@@ -649,7 +636,6 @@ public class FreelancerDashboardController {
             return;
         }
         
-        // Validate that a proposal is selected
         Proposal selectedProposal = proposalsTable.getSelectionModel().getSelectedItem();
         if (selectedProposal == null) {
             proposalsErrorLabel.setText("Please select a proposal to update.");
@@ -658,7 +644,6 @@ public class FreelancerDashboardController {
         }
         proposalsErrorLabel.setVisible(false);
 
-        // Show a dialog to update the bid amount and timeline
         TextInputDialog bidDialog = new TextInputDialog(String.valueOf(selectedProposal.getBidAmount()));
         bidDialog.setTitle("Update Proposal");
         bidDialog.setHeaderText("Update Bid Amount");
@@ -683,7 +668,6 @@ public class FreelancerDashboardController {
                     return;
                 }
 
-                // Update the proposal in the database
                 try (Connection conn = DBUtil.getConnection()) {
                     String sql = "UPDATE Proposals SET bid_amount = ?, timeline = ? WHERE proposal_id = ?";
                     PreparedStatement ps = conn.prepareStatement(sql);
@@ -692,7 +676,6 @@ public class FreelancerDashboardController {
                     ps.setString(3, selectedProposal.getProposalId());
                     ps.executeUpdate();
 
-                    // Update the table view
                     selectedProposal.setBidAmount(newBidAmount);
                     selectedProposal.setTimeline(newTimeline);
                     proposalsTable.refresh();
@@ -717,7 +700,6 @@ public class FreelancerDashboardController {
             return;
         }
         
-        // Validate that a proposal is selected
         Proposal selectedProposal = proposalsTable.getSelectionModel().getSelectedItem();
         if (selectedProposal == null) {
             proposalsErrorLabel.setText("Please select a proposal to delete.");
@@ -726,7 +708,6 @@ public class FreelancerDashboardController {
         }
         proposalsErrorLabel.setVisible(false);
 
-        // Confirm deletion
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Delete Proposal");
         confirmAlert.setHeaderText("Are you sure you want to delete this proposal?");
@@ -734,14 +715,12 @@ public class FreelancerDashboardController {
 
         Optional<ButtonType> result = confirmAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Delete the proposal from the database
             try (Connection conn = DBUtil.getConnection()) {
                 String sql = "DELETE FROM Proposals WHERE proposal_id = ?";
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, selectedProposal.getProposalId());
                 ps.executeUpdate();
 
-                // Remove the proposal from the table view
                 proposalsTable.getItems().remove(selectedProposal);
 
                 showAlert("Proposal deleted successfully!");

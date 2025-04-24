@@ -3,112 +3,84 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.freelancer.ProjectDetailsController"
-            prefHeight="700.0" prefWidth="900.0"
-            stylesheets="/css/style.css">
-
-    <top>
-        <VBox styleClass="header-panel">
-            <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
-            </padding>
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <VBox>
-                    <Label fx:id="titleLabel" text="Project Title" styleClass="panel-title">
-                        <font>
-                            <Font size="22" name="System Bold"/>
-                        </font>
-                    </Label>
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Status:"/>
-                        <Label fx:id="statusLabel" text="Open" styleClass="status-label"/>
-                    </HBox>
-                </VBox>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button onAction="#handleClose" text="Close" styleClass="close-button"/>
-            </HBox>
-        </VBox>
-    </top>
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.freelancer.ProjectDetailsController" spacing="15" styleClass="project-details-container">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
     
-    <center>
-        <SplitPane dividerPositions="0.4" orientation="VERTICAL">
-            <!-- Project details section -->
-            <VBox styleClass="project-details">
-                <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
-                </padding>
-                
-                <GridPane hgap="15" vgap="10">
-                    <columnConstraints>
-                        <ColumnConstraints minWidth="100" prefWidth="120"/>
-                        <ColumnConstraints hgrow="ALWAYS"/>
-                    </columnConstraints>
-                    
-                    <!-- Row 0 -->
-                    <Label text="Category:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="detail-label"/>
-                    <Label fx:id="categoryLabel" text="Web Development" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="detail-value"/>
-                    
-                    <!-- Row 1 -->
-                    <Label text="Budget:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="detail-label"/>
-                    <Label fx:id="budgetLabel" text="$500-1000" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="detail-value"/>
-                    
-                    <!-- Row 2 -->
-                    <Label text="Deadline:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="detail-label"/>
-                    <Label fx:id="deadlineLabel" text="2023-09-30" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="detail-value"/>
-                    
-                    <!-- Row 3 -->
-                    <Label text="Date Created:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="detail-label"/>
-                    <Label fx:id="dateCreatedLabel" text="2023-08-15" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="detail-value"/>
-                </GridPane>
-                
-                <Separator styleClass="content-separator">
-                    <VBox.margin>
-                        <Insets top="15" bottom="15"/>
-                    </VBox.margin>
-                </Separator>
-                
-                <Label text="Description" styleClass="section-title"/>
-                <TextArea fx:id="descriptionArea" editable="false" wrapText="true" styleClass="description-area" VBox.vgrow="ALWAYS"/>
-            </VBox>
+    <HBox styleClass="section-header" alignment="CENTER_LEFT">
+        <Label fx:id="titleLabel" styleClass="project-title" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="Status: " />
+        <Label fx:id="statusLabel" styleClass="status-label" />
+    </HBox>
+    
+    <GridPane vgap="10" hgap="15" styleClass="details-grid">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100" prefWidth="150" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        
+        <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <Label fx:id="descriptionLabel" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        
+        <Label text="Budget:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Label fx:id="budgetLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        
+        <Label text="Deadline:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <Label fx:id="deadlineLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+    </GridPane>
+    
+    <VBox fx:id="proposalsSection" spacing="10">
+        <Label text="Proposals" styleClass="section-title" />
+        
+        <TableView fx:id="proposalsTable">
+            <placeholder>
+                <Label text="No proposals available for this project yet" />
+            </placeholder>
+            <columns>
+                <TableColumn fx:id="freelancerColumn" text="Freelancer" prefWidth="120" />
+                <TableColumn fx:id="bidAmountColumn" text="Bid Amount" prefWidth="100" />
+                <TableColumn fx:id="dateColumn" text="Date" prefWidth="100" />
+                <TableColumn fx:id="statusColumn" text="Status" prefWidth="100" />
+                <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="150" />
+            </columns>
+        </TableView>
+    </VBox>
+    
+    <VBox fx:id="freelancerSection" visible="false" managed="false" spacing="10">
+        <Label text="Assigned Freelancer" styleClass="section-title" />
+        
+        <GridPane vgap="10" hgap="15">
+            <columnConstraints>
+                <ColumnConstraints minWidth="100" prefWidth="150" />
+                <ColumnConstraints hgrow="ALWAYS" />
+            </columnConstraints>
             
-            <!-- Proposals section -->
-            <VBox>
-                <padding>
-                    <Insets top="10" right="20" bottom="20" left="20"/>
-                </padding>
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="Proposals" styleClass="section-title"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                </HBox>
-                
-                <TableView fx:id="proposalsTable" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="freelancerColumn" text="Freelancer" prefWidth="200"/>
-                        <TableColumn fx:id="bidAmountColumn" text="Bid Amount" prefWidth="120"/>
-                        <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
-                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="120"/>
-                    </columns>
-                    <placeholder>
-                        <Label text="No proposals received yet"/>
-                    </placeholder>
-                </TableView>
-            </VBox>
-        </SplitPane>
-    </center>
+            <Label text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Label fx:id="freelancerNameLabel" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            
+             <Label text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <HBox alignment="CENTER_LEFT" spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Label fx:id="ratingLabel" text="Not rated yet" />
+                <FontIcon iconLiteral="fas-star" iconSize="16" styleClass="rating-star" />
+            </HBox>
+            
+             <HBox spacing="10" alignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="2" 
+                  GridPane.columnSpan="2">
+                <Button fx:id="completeButton" text="Mark as Complete" onAction="#handleMarkComplete" 
+                        visible="${statusLabel.text != 'Completed'}" managed="${statusLabel.text != 'Completed'}"/>
+                <Button text="Message Freelancer" onAction="#handleMessageFreelancer" />
+            </HBox>
+        </GridPane>
+    </VBox>
     
-    <bottom>
-        <HBox styleClass="action-bar" alignment="CENTER_RIGHT" spacing="15">
-            <padding>
-                <Insets top="15" right="20" bottom="15" left="20"/>
-            </padding>
-            <Button fx:id="deleteProjectButton" text="Delete Project" onAction="#handleDeleteProject" styleClass="delete-button"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="closeProjectButton" text="Mark as Completed" onAction="#handleCloseProject" styleClass="secondary-button"/>
-            <Button fx:id="editButton" text="Edit Project" onAction="#handleEditProject" styleClass="primary-button"/>
-        </HBox>
-    </bottom>
-</BorderPane>
+     <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Edit Project" onAction="#handleEditProject" fx:id="editButton" />
+        <Button text="Delete Project" onAction="#handleDeleteProject" fx:id="deleteButton" />
+        <Button text="Close" onAction="#handleClose" />
+    </HBox>
+</VBox>

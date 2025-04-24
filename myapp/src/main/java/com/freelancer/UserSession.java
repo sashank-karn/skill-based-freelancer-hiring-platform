@@ -12,7 +12,6 @@ public class UserSession {
     private boolean loggedIn;
     
     private UserSession() {
-        // Private constructor for singleton
         userId = -1;
         loggedIn = false;
     }

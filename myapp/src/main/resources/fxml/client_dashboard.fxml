@@ -12,7 +12,6 @@
             prefHeight="700.0" prefWidth="1000.0"
             stylesheets="/css/style.css">
     
-    <!-- Top navigation bar -->
     <top>
         <HBox styleClass="top-bar">
             <padding>
@@ -44,7 +43,6 @@
         </HBox>
     </top>
     
-    <!-- RESTORED LEFT SIDEBAR -->
     <left>
         <VBox styleClass="sidebar">
             <padding>
@@ -52,7 +50,6 @@
             </padding>
             <Label text="Dashboard" styleClass="sidebar-heading"/>
             
-            <!-- Stats cards -->
             <VBox spacing="15" styleClass="stats-container">
                 <HBox styleClass="stats-card">
                     <VBox>
@@ -78,13 +75,11 @@
             
             <Region VBox.vgrow="ALWAYS"/>
             
-            <!-- RESTORED CREATE PROJECT BUTTON -->
             <Button fx:id="createProjectButton" text="Create New Project" 
                     onAction="#createNewProject" styleClass="primary-button"/>
         </VBox>
     </left>
     
-    <!-- Main content area -->
     <center>
         <VBox spacing="10" styleClass="content-area">
             <padding>
@@ -98,10 +93,8 @@
                     </font>
                 </Label>
                 <Region HBox.hgrow="ALWAYS"/>
-                <!-- Search field removed per earlier request -->
             </HBox>
             
-            <!-- Projects table -->
             <TableView fx:id="projectsTable" VBox.vgrow="ALWAYS" onMouseClicked="#handleProjectSelection">
                 <columns>
                     <TableColumn fx:id="titleColumn" text="Project Title" prefWidth="250"/>

@@ -25,7 +25,6 @@ public class EditProjectController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Initialize category options
         categoryComboBox.getItems().addAll(
             "Web Development", 
             "Mobile Development",
@@ -37,7 +36,6 @@ public class EditProjectController implements Initializable {
             "Other"
         );
         
-        // Add input validation
         budgetField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*(\\.\\d*)?")) {
                 budgetField.setText(oldValue);
@@ -48,15 +46,12 @@ public class EditProjectController implements Initializable {
     public void setProject(Project project) {
         this.project = project;
         
-        // Populate form fields with current project data
         titleField.setText(project.getTitle());
         descriptionArea.setText(project.getDescription());
         budgetField.setText(String.valueOf(project.getBudget()));
         
-        // Set deadline if available 
         if (project.getDeadline() != null && !project.getDeadline().isEmpty()) {
             try {
-                // Assuming deadline is in format YYYY-MM-DD
                 String[] parts = project.getDeadline().split("-");
                 if (parts.length == 3) {
                     deadlinePicker.setValue(java.time.LocalDate.of(
@@ -86,7 +81,6 @@ public class EditProjectController implements Initializable {
     
     @FXML
     private void handleSave() {
-        // Validate inputs
         if (titleField.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Error", "Project title cannot be empty");
             return;
@@ -113,7 +107,6 @@ public class EditProjectController implements Initializable {
             String category = categoryComboBox.getValue() != null ? categoryComboBox.getValue() : "General";
             String skills = skillsField.getText();
             
-            // Update project in the database
             try (Connection conn = DBUtil.getConnection()) {
                 String sql = "UPDATE Projects SET title = ?, description = ?, budget = ?, " +
                              "deadline = ?, category = ?, skills = ? WHERE project_id = ?";
@@ -121,7 +114,7 @@ public class EditProjectController implements Initializable {
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, titleField.getText().trim());
                 ps.setString(2, descriptionArea.getText().trim());
-                ps.setDouble(3, budget); // Store as double, not as string with $ sign
+                ps.setDouble(3, budget);
                 ps.setString(4, deadline);
                 ps.setString(5, category);
                 ps.setString(6, skills);
@@ -130,7 +123,6 @@ public class EditProjectController implements Initializable {
                 int rowsAffected = ps.executeUpdate();
                 
                 if (rowsAffected > 0) {
-                    // Update local project object
                     project.setTitle(titleField.getText().trim());
                     project.setDescription(descriptionArea.getText().trim());
                     project.setBudget(budget);
@@ -138,16 +130,14 @@ public class EditProjectController implements Initializable {
                     project.setCategory(category);
                     project.setSkills(skills);
                     
-                    // Update parent controllers
                     if (detailsController != null) {
-                        detailsController.refreshProject();
+                        detailsController.refreshProjectDetails(project);
                     }
                     
                     if (dashboardController != null) {
                         dashboardController.refreshProjects();
                     }
                     
-                    // Close the window
                     ((Stage) titleField.getScene().getWindow()).close();
                     
                     showAlert(Alert.AlertType.INFORMATION, "Success", "Project updated successfully");

@@ -15,103 +15,126 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private ComboBox<String> roleBox;
     @FXML private Button loginButton;
-    @FXML private Label errorLabel; // Add this to reference the error label
+    @FXML private Label errorLabel;
 
     @FXML
     public void initialize() {
-        // Initialize the ComboBox with roles
         roleBox.getItems().addAll("Client", "Freelancer", "Admin");
-        roleBox.setValue("Client"); // Set default value
+        roleBox.setValue("Client");
+        
+        if (errorLabel != null) {
+            errorLabel.setVisible(false);
+        }
     }
 
     @FXML
     private void handleLogin(ActionEvent event) {
         String email = emailField.getText().trim();
         String password = passwordField.getText().trim();
+        String selectedRole = roleBox.getValue().toLowerCase();
+        
+        if (email.isEmpty() || password.isEmpty()) {
+            showError("Email and password cannot be empty.");
+            return;
+        }
         
         try (Connection conn = DBUtil.getConnection()) {
-            String sql = "SELECT * FROM Users WHERE email = ? AND password = ?";
+            ensureTablesExist(conn);
+            
+            String sql = "SELECT * FROM Users WHERE email = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, email);
-            ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
             
             if (rs.next()) {
-                int userId = rs.getInt("user_id");
-                String role = rs.getString("role");
-                String userName = rs.getString("name"); // Assuming there's a name column
+                String dbPassword = rs.getString("password");
                 
-                // Debug output
-                System.out.println("Login successful! User ID: " + userId + ", Role: " + role);
-                
-                // Create a session for the user
-                UserSession session = UserSession.getInstance();
-                session.setUser(userId, userName, role);
-                
-                if (role.equalsIgnoreCase("client")) {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/client_dashboard.fxml"));
-                    Parent root = loader.load();
-                    
-                    ClientDashboardController controller = loader.getController();
-                    controller.setUserId(userId);
-                    
-                    Scene scene = new Scene(root);
-                    StyleManager.applyStylesheets(scene);
-                    
-                    Stage stage = (Stage) emailField.getScene().getWindow();
-                    stage.setScene(scene);
-                    stage.setTitle("Client Dashboard");
-                    stage.show();
-                } 
-                else if (role.equalsIgnoreCase("freelancer")) {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/freelancer_dashboard.fxml"));
-                    Parent root = loader.load();
-                    
-                    FreelancerDashboardController controller = loader.getController();
-                    controller.setUserId(userId);
-                    
-                    Scene scene = new Scene(root);
-                    StyleManager.applyStylesheets(scene);
-                    
-                    Stage stage = (Stage) emailField.getScene().getWindow();
-                    stage.setScene(scene);
-                    stage.setTitle("Freelancer Dashboard");
-                    stage.show();
+                if (!password.equals(dbPassword)) {
+                    showError("Invalid password.");
+                    return;
                 }
-                else if (role.equalsIgnoreCase("admin")) {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin_dashboard.fxml"));
-                    Parent root = loader.load();
-                    
-                    AdminDashboardController controller = loader.getController();
-                    controller.setUserId(userId);  // This will now work with our new method
-                    
-                    Scene scene = new Scene(root);
-                    StyleManager.applyStylesheets(scene);
-                    
-                    Stage stage = (Stage) emailField.getScene().getWindow();
-                    stage.setScene(scene);
-                    stage.setTitle("Admin Dashboard");
-                    stage.show();
+                
+                String dbRole = rs.getString("role");
+                
+                if (dbRole == null || !dbRole.equalsIgnoreCase(selectedRole)) {
+                    showError("You do not have access as " + selectedRole + ".");
+                    return;
+                }
+                
+                int userId = rs.getInt("user_id");
+                String userName = rs.getString("name"); 
+                
+                UserSession session = UserSession.getInstance();
+                session.setUser(userId, userName, dbRole);
+                
+                if (dbRole.equalsIgnoreCase("client")) {
+                    navigateToDashboard("/fxml/client_dashboard.fxml", "Client Dashboard", userId);
+                } 
+                else if (dbRole.equalsIgnoreCase("freelancer")) {
+                    navigateToDashboard("/fxml/freelancer_dashboard.fxml", "Freelancer Dashboard", userId);
+                }
+                else if (dbRole.equalsIgnoreCase("admin")) {
+                    navigateToDashboard("/fxml/admin_dashboard.fxml", "Admin Dashboard", userId);
                 }
                 else {
-                    // Unknown role
-                    showAlert(Alert.AlertType.ERROR, "Login Error", 
-                        "Unknown user role: " + role);
+                    showError("Unknown user role: " + dbRole);
                 }
             } else {
-                showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid email or password.");
+                showError("No account found with this email.");
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Database error: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not connect to database: " + e.getMessage());
+            showError("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+    
+    private void navigateToDashboard(String fxmlPath, String title, int userId) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            
+            Object controller = loader.getController();
+            if (controller instanceof ClientDashboardController) {
+                ((ClientDashboardController) controller).setUserId(userId);
+            } else if (controller instanceof FreelancerDashboardController) {
+                ((FreelancerDashboardController) controller).setUserId(userId);
+            } else if (controller instanceof AdminDashboardController) {
+                ((AdminDashboardController) controller).setUserId(userId);
+            }
+            
+            Scene scene = new Scene(root);
+            StyleManager.applyStylesheets(scene);
+            
+            Stage stage = (Stage) emailField.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle(title);
+            stage.show();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", 
+                "Could not load dashboard: " + e.getMessage());
         }
     }
 
+    private void showError(String message) {
+        if (errorLabel != null) {
+            errorLabel.setText(message);
+            errorLabel.setVisible(true);
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Login Error", message);
+        }
+    }
+    
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        StyleManager.styleAlert(alert);
         alert.showAndWait();
     }
 
@@ -119,16 +142,54 @@ public class LoginController {
     private void goToRegister(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/register.fxml"));
-            Parent root = loader.load(); // Load the FXML file only once
+            Parent root = loader.load();
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            StyleManager.applyStylesheets(scene);
 
             Stage stage = (Stage) emailField.getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("Register");
             stage.show();
         } catch (Exception e) {
-            System.err.println("Could not load register page: " + e.getMessage());
+            e.printStackTrace();
+            showError("Could not load register page: " + e.getMessage());
+        }
+    }
+    
+    private void ensureTablesExist(Connection conn) throws SQLException {
+        try {
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet rs = meta.getTables(null, null, "USERS", null);
+            
+            if (!rs.next()) {
+                String createUsersTable = "CREATE TABLE Users (" +
+                    "user_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                    "name VARCHAR(100) NOT NULL, " +
+                    "email VARCHAR(100) UNIQUE NOT NULL, " +
+                    "password VARCHAR(100) NOT NULL, " +
+                    "role VARCHAR(20) NOT NULL, " +
+                    "created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+                    
+                Statement stmt = conn.createStatement();
+                stmt.execute(createUsersTable);
+                
+                String insertAdmin = "INSERT INTO Users (name, email, password, role) " +
+                                    "VALUES ('Admin User', 'admin@example.com', 'admin123', 'admin')";
+                stmt.execute(insertAdmin);
+                
+                String insertClient = "INSERT INTO Users (name, email, password, role) " +
+                                     "VALUES ('Client User', 'client@example.com', 'client123', 'client')";
+                stmt.execute(insertClient);
+                
+                String insertFreelancer = "INSERT INTO Users (name, email, password, role) " +
+                                         "VALUES ('Freelancer User', 'freelancer@example.com', 'freelancer123', 'freelancer')";
+                stmt.execute(insertFreelancer);
+                
+                System.out.println("Created Users table and test accounts");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error creating database tables: " + e.getMessage());
+            throw e;
         }
     }
 }

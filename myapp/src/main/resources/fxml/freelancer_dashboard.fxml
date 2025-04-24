@@ -10,18 +10,15 @@
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.freelancer.FreelancerDashboardController">
     
-    <!-- Navigation Bar -->
     <HBox styleClass="nav-bar" alignment="CENTER_LEFT" spacing="10">
         <padding>
             <Insets top="10" right="20" bottom="10" left="20"/>
         </padding>
         
-        <!-- Left side -->
          <Label text="Freelancer Platform - Freelancer Dashboard" styleClass="page-title"/>
         
-        <Region HBox.hgrow="ALWAYS"/> <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS"/> 
         
-        <!-- Right side -->
         <FontIcon fx:id="profileIcon" iconLiteral="fas-user-circle" iconSize="20" 
          onMouseClicked="#openProfile" styleClass="nav-icon"/>
          <FontIcon fx:id="logoutIcon" iconLiteral="fas-sign-out-alt" iconSize="20" 
@@ -29,9 +26,7 @@
        
     </HBox>
     
-    <!-- Main Content -->
     <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS">
-        <!-- Home Tab -->
         <Tab text="Home" closable="false">
             <VBox spacing="10" styleClass="content-box">
                 <Label text="Total Projects: " fx:id="totalProjectsLabel"/>
@@ -40,7 +35,6 @@
             </VBox>
         </Tab>
 
-        <!-- Browse Projects Tab -->
         <Tab text="Browse Projects" closable="false">
             <VBox spacing="10" styleClass="content-box">
                 <TableView fx:id="browseProjectsTable">
@@ -61,7 +55,6 @@
             </VBox>
         </Tab>
 
-        <!-- My Proposals Tab -->
         <Tab text="My Proposals" closable="false">
             <VBox spacing="10" styleClass="content-box">
                 <TableView fx:id="proposalsTable">
@@ -80,7 +73,6 @@
             </VBox>
         </Tab>
 
-        <!-- My Projects Tab -->
         <Tab text="My Projects" closable="false">
             <VBox spacing="10" styleClass="content-box">
                 <TableView fx:id="myProjectsTable">

@@ -3,10 +3,9 @@
 <?import javafx.scene.control.*?>
 
 <VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml" fx:controller="com.freelancer.LoginController">
-    <!-- Error Message Label -->
+
     <Label fx:id="errorLabel" text="" style="-fx-text-fill: red; -fx-font-size: 12px;" visible="false" />
 
-    <!-- Login Form -->
     <TextField fx:id="emailField" promptText="Email" />
     <PasswordField fx:id="passwordField" promptText="Password" />
     <ComboBox fx:id="roleBox" promptText="Select Role" />

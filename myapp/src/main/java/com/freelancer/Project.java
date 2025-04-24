@@ -14,7 +14,6 @@ public class Project {
     private final StringProperty status;
     private final StringProperty clientName;
     
-    // Additional properties for project management
     private final IntegerProperty clientId;
     private final StringProperty creationDate;
     private final StringProperty category;
@@ -26,7 +25,6 @@ public class Project {
     private final StringProperty assignedFreelancerName;
     private final StringProperty paymentStatus;
 
-    // Original constructor for all basic fields
     public Project(String projectId, String title, String description, double budget, String deadline, String status, String clientName) {
         this.projectId = new SimpleStringProperty(projectId);
         this.title = new SimpleStringProperty(title);
@@ -37,7 +35,6 @@ public class Project {
         this.status = new SimpleStringProperty(status);
         this.clientName = new SimpleStringProperty(clientName);
         
-        // Initialize additional properties with default values
         this.clientId = new SimpleIntegerProperty(0);
         this.creationDate = new SimpleStringProperty(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
         this.category = new SimpleStringProperty("");
@@ -49,13 +46,10 @@ public class Project {
         this.assignedFreelancerName = new SimpleStringProperty("");
         this.paymentStatus = new SimpleStringProperty("Unpaid");
     }
-
-    // Original constructor for projects without clientName
     public Project(String projectId, String title, String description, double budget, String deadline, String status) {
         this(projectId, title, description, budget, deadline, status, "");
     }
     
-    // Full constructor with all fields
     public Project(String projectId, String title, String description, double budget, 
                   String deadline, String status, String clientName, int clientId,
                   String creationDate, String category, String skills, int proposalCount,
@@ -81,8 +75,7 @@ public class Project {
         this.paymentStatus = new SimpleStringProperty(paymentStatus);
     }
 
-    // Add this constructor which is needed by ClientDashboardController
-    public Project(String projectId, String title, String description, String status, 
+     public Project(String projectId, String title, String description, String status, 
                   String budget, String deadline, int clientId) {
         this.projectId = new SimpleStringProperty(projectId);
         this.title = new SimpleStringProperty(title);
@@ -91,10 +84,8 @@ public class Project {
         this.deadline = new SimpleStringProperty(deadline);
         this.clientName = new SimpleStringProperty("");
         
-        // Parse budget properly
         double budgetValue = 0.0;
         try {
-            // Remove $ symbol and any whitespace, then parse
             String cleanBudget = budget.replace("$", "").trim();
             budgetValue = Double.parseDouble(cleanBudget);
         } catch (Exception e) {
@@ -104,7 +95,6 @@ public class Project {
         this.budget = new SimpleDoubleProperty(budgetValue);
         this.formattedBudget = new SimpleStringProperty(budget); // Keep original formatting
         
-        // Initialize all required properties
         this.clientId = new SimpleIntegerProperty(clientId);
         this.creationDate = new SimpleStringProperty(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
         this.category = new SimpleStringProperty("");
@@ -117,13 +107,11 @@ public class Project {
         this.paymentStatus = new SimpleStringProperty("Unpaid");
     }
     
-    // This constructor is needed for the addSampleProjectsToUI method
-    public Project(int projectId, String title, String description, String status, 
+     public Project(int projectId, String title, String description, String status, 
                   String budget, String deadline, int clientId) {
         this(String.valueOf(projectId), title, description, status, budget, deadline, clientId);
     }
     
-    // Original getters and property methods
     public String getProjectId() { return projectId.get(); }
     public StringProperty projectIdProperty() { return projectId; }
     
@@ -148,7 +136,6 @@ public class Project {
     public String getClientName() { return clientName.get(); }
     public StringProperty clientNameProperty() { return clientName; }
     
-    // Setters for original properties
     public void setTitle(String title) { this.title.set(title); }
     public void setDescription(String description) { this.description.set(description); }
     public void setBudget(double budget) { 
